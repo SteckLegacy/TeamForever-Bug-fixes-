@@ -68,15 +68,6 @@ inline void SetGameVolumes(int bgmVol, int sfxVol)
         sfxVolume = MAX_VOLUME;
 }
 
-inline void ReleaseAudioDevice()
-{
-    StopMusic(true);
-    StopAllSfx();
-    ReleaseStageSfx();
-    ReleaseGlobalSfx();
-
-    if (musicMutex)
-        SDL_DestroyMutex(musicMutex);
-}
+void ReleaseAudioDevice();
 
 #endif // !AUDIO_H

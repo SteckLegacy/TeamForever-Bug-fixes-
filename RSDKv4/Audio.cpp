@@ -293,5 +293,48 @@ void ProcessAudioMixing(Sint32 *dst, const Sint16 *src, int len, int volume, sby
         i++;
     }
 }
+
+void ReleaseAudioDevice()
+{
+    StopMusic(true);
+    StopAllSfx();
+    ReleaseStageSfx();
+    ReleaseGlobalSfx();
+
+    for (int i = 0; i < STREAMFILE_COUNT; ++i) {
+#if RETRO_USING_SDL2
+        if (streamInfo[i].loaded && streamInfo[i].stream) {
+            SDL_FreeAudioStream(streamInfo[i].stream);
+            streamInfo[i].stream = NULL;
+        }
+#endif
+        if (streamInfo[i].loaded) {
+            ov_clear(&streamInfo[i].vorbisFile);
+            streamInfo[i].loaded = false;
+        }
+    }
+
+    if (musicMutex) {
+        SDL_DestroyMutex(musicMutex);
+        musicMutex = NULL;
+    }
+
+#if RETRO_USING_SDL2
+    if (ogv_stream) {
+        SDL_FreeAudioStream(ogv_stream);
+        ogv_stream = NULL;
+    }
+
+    if (audioDevice) {
+        SDL_CloseAudioDevice(audioDevice);
+        audioDevice = 0;
+    }
+#elif RETRO_USING_SDL1
+    if (audioEnabled) {
+        SDL_CloseAudio();
+    }
+#endif
+    audioEnabled = false;
+}
 #endif
 #endif

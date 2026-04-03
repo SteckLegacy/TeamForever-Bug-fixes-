@@ -105,6 +105,15 @@ void LoadSfx(char *filePath, byte sfxID)
     if (!audioEnabled)
         return;
 
+    if (sfxList[sfxID].loaded) {
+        LockAudioDevice();
+        if (sfxList[sfxID].buffer)
+            free(sfxList[sfxID].buffer);
+        sfxList[sfxID].buffer = NULL;
+        sfxList[sfxID].loaded = false;
+        UnlockAudioDevice();
+    }
+
     FileInfo info;
     char fullPath[0x80];
 

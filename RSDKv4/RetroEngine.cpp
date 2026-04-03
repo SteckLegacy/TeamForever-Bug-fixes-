@@ -559,7 +559,11 @@ void RetroEngine::Run()
             for (int s = 0; s < gameSpeed; ++s) {
                 ProcessInput();
 
-                if (inputDevice[INPUT_SELECT].press && Engine.devMenu && engineDebugMode) {
+                if (inputDevice[INPUT_SELECT].press && Engine.devMenu) {
+#if RETRO_USE_MOD_LOADER
+                    if (Engine.gameMode == ENGINE_DEVMENU && stageMode == DEVMENU_MODMENU)
+                        RefreshEngine();
+#endif
                     ClearNativeObjects();
                     CREATE_ENTITY(RetroGameLoop);
                     if (Engine.gameDeviceType == RETRO_MOBILE)

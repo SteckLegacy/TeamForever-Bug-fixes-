@@ -25,7 +25,7 @@ SOURCES		:=	\
 	../RSDKv4/NativeObjects/		\
 	../dependencies/all/stb-image \
 	../dependencies/all/theoraplay 	\
-	../dependencies/all/tinyxml2
+	../dependencies/all/pugixml/src
 
 INCLUDES	:=	\
 	../RSDKv4/ 			\
@@ -33,7 +33,7 @@ INCLUDES	:=	\
 	../dependencies/all/asio/asio/include \
 	../dependencies/all/stb-image \
 	../dependencies/all/theoraplay \
-	../dependencies/all/tinyxml2
+	../dependencies/all/pugixml/src
 
 PKGFILES	:=	../pkgfiles1
 ICON0		:=	$(PKGFILES)/ICON0.PNG

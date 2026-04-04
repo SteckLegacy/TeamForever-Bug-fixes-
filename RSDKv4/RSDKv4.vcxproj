@@ -112,7 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_SW_REN;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/tinyxml2/;$(SolutionDir)dependencies/all/theoraplay/;$(SolutionDir)dependencies/windows/SDL2/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/pugixml/src/;$(SolutionDir)dependencies/all/theoraplay/;$(SolutionDir)dependencies/windows/SDL2/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -137,7 +137,8 @@ copy /Y "$(SolutionDir)dependencies\windows\glew\bin\Release\$(Platform)\glew32.
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_SW_REN;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/tinyxml2/;$(SolutionDir)dependencies/all/theoraplay/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/windows/SDL2/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/pugixml/src/;$(SolutionDir)dependencies/all/theoraplay/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/windows/SDL2/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/pugixml/src/;$(SolutionDir)dependencies/all/theoraplay/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/windows/SDL2/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -164,7 +165,7 @@ copy /Y "$(SolutionDir)dependencies\windows\glew\bin\Release\$(Platform)\glew32.
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_SW_REN;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/tinyxml2/;$(SolutionDir)dependencies/all/theoraplay/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/windows/SDL2/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/pugixml/src/;$(SolutionDir)dependencies/all/theoraplay/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/windows/SDL2/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -193,7 +194,7 @@ copy /Y "$(SolutionDir)dependencies\windows\glew\bin\Release\$(Platform)\glew32.
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_SW_REN;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/tinyxml2/;$(SolutionDir)dependencies/windows/SDL2/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/all/theoraplay/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/pugixml/src/;$(SolutionDir)dependencies/windows/SDL2/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/all/theoraplay/;$(SolutionDir)dependencies/windows/libtheora/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -215,7 +216,7 @@ copy /Y "$(SolutionDir)dependencies\windows\glew\bin\Release\$(Platform)\glew32.
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\dependencies\all\theoraplay\theoraplay.c" />
-    <ClCompile Include="..\dependencies\all\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="..\dependencies\all\pugixml\src\pugixml.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="Collision.cpp" />
@@ -283,7 +284,8 @@ copy /Y "$(SolutionDir)dependencies\windows\glew\bin\Release\$(Platform)\glew32.
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dependencies\all\theoraplay\theoraplay.h" />
-    <ClInclude Include="..\dependencies\all\tinyxml2\tinyxml2.h" />
+    <ClInclude Include="..\dependencies\all\pugixml\src\pugixml.hpp" />
+    <ClInclude Include="..\dependencies\all\pugixml\src\pugiconfig.hpp" />
     <ClInclude Include="Animation.hpp" />
     <ClInclude Include="Audio.hpp" />
     <ClInclude Include="Collision.hpp" />

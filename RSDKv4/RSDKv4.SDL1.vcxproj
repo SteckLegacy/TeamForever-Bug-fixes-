@@ -111,7 +111,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/tinyxml2/;$(SolutionDir)dependencies/windows/SDL1/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/pugixml/src/;$(SolutionDir)dependencies/windows/SDL1/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/pugixml/src/;$(SolutionDir)dependencies/windows/SDL1/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/pugixml/src/;$(SolutionDir)dependencies/windows/SDL1/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)RSDKv4/;$(SolutionDir)RSDKv4/NativeObjects/;$(SolutionDir)dependencies/all/asio/asio/include/;$(SolutionDir)dependencies/all/stb-image/;$(SolutionDir)dependencies/all/pugixml/src/;$(SolutionDir)dependencies/windows/SDL1/include/;$(SolutionDir)dependencies/windows/libogg/include/;$(SolutionDir)dependencies/windows/libvorbis/include/;$(SolutionDir)dependencies/windows/glew/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -207,7 +210,7 @@ copy /Y "$(SolutionDir)dependencies\windows\glew\bin\Release\$(Platform)\glew32.
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\dependencies\all\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="..\dependencies\all\pugixml\src\pugixml.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="Collision.cpp" />
@@ -277,7 +280,8 @@ copy /Y "$(SolutionDir)dependencies\windows\glew\bin\Release\$(Platform)\glew32.
     <ClCompile Include="Text.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\dependencies\all\tinyxml2\tinyxml2.h" />
+    <ClInclude Include="..\dependencies\all\pugixml\src\pugixml.hpp" />
+    <ClInclude Include="..\dependencies\all\pugixml\src\pugiconfig.hpp" />
     <ClInclude Include="Animation.hpp" />
     <ClInclude Include="Audio.hpp" />
     <ClInclude Include="Collision.hpp" />

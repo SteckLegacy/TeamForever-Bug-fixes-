@@ -670,46 +670,15 @@ void RetroEngine::Run()
 }
 
 #if RETRO_USE_MOD_LOADER
-const tinyxml2::XMLElement *firstXMLChildElement(tinyxml2::XMLDocument *doc, const tinyxml2::XMLElement *elementPtr, const char *name)
-{
-    if (doc) {
-        if (!elementPtr)
-            return doc->FirstChildElement(name);
-        else
-            return elementPtr->FirstChildElement(name);
-    }
-    return NULL;
-}
-
-const tinyxml2::XMLElement *nextXMLSiblingElement(tinyxml2::XMLDocument *doc, const tinyxml2::XMLElement *elementPtr, const char *name)
-{
-    if (doc) {
-        if (!elementPtr)
-            return doc->NextSiblingElement(name);
-        else
-            return elementPtr->NextSiblingElement(name);
-    }
-    return NULL;
-}
-
-const tinyxml2::XMLAttribute *findXMLAttribute(const tinyxml2::XMLElement *elementPtr, const char *name) { return elementPtr->FindAttribute(name); }
-const char *getXMLAttributeName(const tinyxml2::XMLAttribute *attributePtr) { return attributePtr->Name(); }
-int getXMLAttributeValueInt(const tinyxml2::XMLAttribute *attributePtr) { return attributePtr->IntValue(); }
-bool getXMLAttributeValueBool(const tinyxml2::XMLAttribute *attributePtr) { return attributePtr->BoolValue(); }
-const char *getXMLAttributeValueString(const tinyxml2::XMLAttribute *attributePtr) { return attributePtr->Value(); }
-
 void RetroEngine::LoadXMLVariables()
 {
     FileInfo info;
 
-    tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
-    char *xmlData              = nullptr;
-    int xmlDataSize            = 0;
+    pugi::xml_document doc;
+    char *xmlData   = nullptr;
+    int xmlDataSize = 0;
 
     for (int m = 0; m < (int)modList.size(); ++m) {
-        // We reversed the load order to fix a bug
-        // Flip yo for real
-        // for (int m = ((int)modList.size() - 1); m >= 0; --m) {
         if (!modList[m].active)
             continue;
 
@@ -725,42 +694,27 @@ void RetroEngine::LoadXMLVariables()
             FileRead(xmlData, info.fileSize);
             xmlData[info.fileSize] = 0;
 
-            bool success = doc->Parse(xmlData) == tinyxml2::XML_SUCCESS;
-
-            if (success) {
-                const tinyxml2::XMLElement *gameElement      = firstXMLChildElement(doc, nullptr, "game");
-                const tinyxml2::XMLElement *variablesElement = firstXMLChildElement(doc, gameElement, "variables");
+            if (doc.load_buffer_inplace(xmlData, info.fileSize, pugi::parse_minimal | pugi::parse_ws_pcdata)) {
+                pugi::xml_node gameElement      = doc.child("game");
+                pugi::xml_node variablesElement = gameElement.child("variables");
                 if (variablesElement) {
-                    const tinyxml2::XMLElement *varElement = firstXMLChildElement(doc, variablesElement, "variable");
-                    if (varElement) {
-                        do {
-                            const tinyxml2::XMLAttribute *nameAttr = findXMLAttribute(varElement, "name");
-                            const char *varName                    = "unknownVariable";
-                            if (nameAttr)
-                                varName = getXMLAttributeValueString(nameAttr);
+                    for (pugi::xml_node varElement = variablesElement.child("variable"); varElement; varElement = varElement.next_sibling("variable")) {
+                        const char *varName = varElement.attribute("name").as_string("unknownVariable");
+                        int varValue        = varElement.attribute("value").as_int(0);
 
-                            const tinyxml2::XMLAttribute *valAttr = findXMLAttribute(varElement, "value");
-                            int varValue                          = 0;
-                            if (valAttr)
-                                varValue = getXMLAttributeValueInt(valAttr);
-
-                            StrCopy(globalVariableNames[globalVariablesCount], varName);
-                            globalVariables[globalVariablesCount] = varValue;
-                            globalVariablesCount++;
-
-                        } while ((varElement = nextXMLSiblingElement(doc, varElement, "variable")));
+                        StrCopy(globalVariableNames[globalVariablesCount], varName);
+                        globalVariables[globalVariablesCount] = varValue;
+                        globalVariablesCount++;
                     }
                 }
             }
 
-            doc->Clear();
             CloseFile();
         }
     }
 
     if (xmlData)
         delete[] xmlData;
-    delete doc;
 
     SetActiveMod(-1);
 }
@@ -768,14 +722,11 @@ void RetroEngine::LoadXMLPalettes()
 {
     FileInfo info;
 
-    tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
-    char *xmlData              = nullptr;
-    int xmlDataSize            = 0;
+    pugi::xml_document doc;
+    char *xmlData   = nullptr;
+    int xmlDataSize = 0;
 
     for (int m = 0; m < (int)modList.size(); ++m) {
-        // We reversed the load order to fix a bug
-        // Flip yo for real
-        // for (int m = ((int)modList.size() - 1); m >= 0; --m) {
         if (!modList[m].active)
             continue;
 
@@ -790,55 +741,28 @@ void RetroEngine::LoadXMLPalettes()
             FileRead(xmlData, info.fileSize);
             xmlData[info.fileSize] = 0;
 
-            bool success = doc->Parse(xmlData) == tinyxml2::XML_SUCCESS;
-
-            if (success) {
-                const tinyxml2::XMLElement *gameElement    = firstXMLChildElement(doc, nullptr, "game");
-                const tinyxml2::XMLElement *paletteElement = firstXMLChildElement(doc, gameElement, "palette");
+            if (doc.load_buffer_inplace(xmlData, info.fileSize, pugi::parse_minimal | pugi::parse_ws_pcdata)) {
+                pugi::xml_node gameElement    = doc.child("game");
+                pugi::xml_node paletteElement = gameElement.child("palette");
                 if (paletteElement) {
-                    const tinyxml2::XMLElement *clrElement = firstXMLChildElement(doc, paletteElement, "color");
-                    if (clrElement) {
-                        do {
-                            const tinyxml2::XMLAttribute *bankAttr = findXMLAttribute(clrElement, "bank");
-                            int clrBank                            = 0;
-                            if (bankAttr)
-                                clrBank = getXMLAttributeValueInt(bankAttr);
+                    for (pugi::xml_node clrElement = paletteElement.child("color"); clrElement; clrElement = clrElement.next_sibling("color")) {
+                        int clrBank = clrElement.attribute("bank").as_int(0);
+                        int clrInd  = clrElement.attribute("index").as_int(0);
+                        int clrR    = clrElement.attribute("r").as_int(0);
+                        int clrG    = clrElement.attribute("g").as_int(0);
+                        int clrB    = clrElement.attribute("b").as_int(0);
 
-                            const tinyxml2::XMLAttribute *indAttr = findXMLAttribute(clrElement, "index");
-                            int clrInd                            = 0;
-                            if (indAttr)
-                                clrInd = getXMLAttributeValueInt(indAttr);
-
-                            const tinyxml2::XMLAttribute *rAttr = findXMLAttribute(clrElement, "r");
-                            int clrR                            = 0;
-                            if (rAttr)
-                                clrR = getXMLAttributeValueInt(rAttr);
-
-                            const tinyxml2::XMLAttribute *gAttr = findXMLAttribute(clrElement, "g");
-                            int clrG                            = 0;
-                            if (gAttr)
-                                clrG = getXMLAttributeValueInt(gAttr);
-
-                            const tinyxml2::XMLAttribute *bAttr = findXMLAttribute(clrElement, "b");
-                            int clrB                            = 0;
-                            if (bAttr)
-                                clrB = getXMLAttributeValueInt(bAttr);
-
-                            SetPaletteEntry(clrBank, clrInd, clrR, clrG, clrB);
-
-                        } while ((clrElement = nextXMLSiblingElement(doc, clrElement, "color")));
+                        SetPaletteEntry(clrBank, clrInd, clrR, clrG, clrB);
                     }
                 }
             }
 
-            doc->Clear();
             CloseFile();
         }
     }
 
     if (xmlData)
         delete[] xmlData;
-    delete doc;
 
     SetActiveMod(-1);
 }
@@ -847,14 +771,11 @@ void RetroEngine::LoadXMLObjects()
     FileInfo info;
     modObjCount = 0;
 
-    tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
-    char *xmlData              = nullptr;
-    int xmlDataSize            = 0;
+    pugi::xml_document doc;
+    char *xmlData   = nullptr;
+    int xmlDataSize = 0;
 
     for (int m = 0; m < (int)modList.size(); ++m) {
-        // We reversed the load order to fix a bug
-        // Flip yo for real
-        // for (int m = ((int)modList.size() - 1); m >= 0; --m) {
         if (!modList[m].active)
             continue;
 
@@ -869,42 +790,26 @@ void RetroEngine::LoadXMLObjects()
             FileRead(xmlData, info.fileSize);
             xmlData[info.fileSize] = 0;
 
-            bool success = doc->Parse(xmlData) == tinyxml2::XML_SUCCESS;
-
-            if (success) {
-                const tinyxml2::XMLElement *gameElement    = firstXMLChildElement(doc, nullptr, "game");
-                const tinyxml2::XMLElement *objectsElement = firstXMLChildElement(doc, gameElement, "objects");
+            if (doc.load_buffer_inplace(xmlData, info.fileSize, pugi::parse_minimal | pugi::parse_ws_pcdata)) {
+                pugi::xml_node gameElement    = doc.child("game");
+                pugi::xml_node objectsElement = gameElement.child("objects");
                 if (objectsElement) {
-                    const tinyxml2::XMLElement *objElement = firstXMLChildElement(doc, objectsElement, "object");
-                    if (objElement) {
-                        do {
-                            const tinyxml2::XMLAttribute *nameAttr = findXMLAttribute(objElement, "name");
-                            const char *objName                    = "unknownObject";
-                            if (nameAttr)
-                                objName = getXMLAttributeValueString(nameAttr);
+                    for (pugi::xml_node objElement = objectsElement.child("object"); objElement; objElement = objElement.next_sibling("object")) {
+                        const char *objName   = objElement.attribute("name").as_string("unknownObject");
+                        const char *objScript = objElement.attribute("script").as_string("unknownObject.txt");
 
-                            const tinyxml2::XMLAttribute *scrAttr = findXMLAttribute(objElement, "script");
-                            const char *objScript                 = "unknownObject.txt";
-                            if (scrAttr)
-                                objScript = getXMLAttributeValueString(scrAttr);
+                        byte flags = 0;
 
-                            byte flags = 0;
+                        // forces the object to be loaded, this means the object doesn't have to be and *SHOULD NOT* be in the stage object
+                        // list if it is, it'll cause issues!!!!
+                        int objForceLoad = objElement.attribute("forceLoad").as_bool(false);
 
-                            // forces the object to be loaded, this means the object doesn't have to be and *SHOULD NOT* be in the stage object
-                            // list if it is, it'll cause issues!!!!
-                            const tinyxml2::XMLAttribute *loadAttr = findXMLAttribute(objElement, "forceLoad");
-                            int objForceLoad                       = false;
-                            if (loadAttr)
-                                objForceLoad = getXMLAttributeValueBool(loadAttr);
+                        flags |= (objForceLoad & 1);
 
-                            flags |= (objForceLoad & 1);
-
-                            StrCopy(modTypeNames[modObjCount], objName);
-                            StrCopy(modScriptPaths[modObjCount], objScript);
-                            modScriptFlags[modObjCount] = flags;
-                            modObjCount++;
-
-                        } while ((objElement = nextXMLSiblingElement(doc, objElement, "object")));
+                        StrCopy(modTypeNames[modObjCount], objName);
+                        StrCopy(modScriptPaths[modObjCount], objScript);
+                        modScriptFlags[modObjCount] = flags;
+                        modObjCount++;
                     }
                 }
             }
@@ -912,14 +817,12 @@ void RetroEngine::LoadXMLObjects()
                 PrintLog("Failed to parse Game.xml File!");
             }
 
-            doc->Clear();
             CloseFile();
         }
     }
 
     if (xmlData)
         delete[] xmlData;
-    delete doc;
 
     SetActiveMod(-1);
 }
@@ -928,14 +831,11 @@ void RetroEngine::LoadXMLSoundFX()
     FileInfo info;
     FileInfo infoStore;
 
-    tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
-    char *xmlData              = nullptr;
-    int xmlDataSize            = 0;
+    pugi::xml_document doc;
+    char *xmlData   = nullptr;
+    int xmlDataSize = 0;
 
     for (int m = 0; m < (int)modList.size(); ++m) {
-        // We reversed the load order to fix a bug
-        // Flip yo for real
-        // for (int m = ((int)modList.size() - 1); m >= 0; --m) {
         if (!modList[m].active)
             continue;
 
@@ -950,34 +850,21 @@ void RetroEngine::LoadXMLSoundFX()
             FileRead(xmlData, info.fileSize);
             xmlData[info.fileSize] = 0;
 
-            bool success = doc->Parse(xmlData) == tinyxml2::XML_SUCCESS;
-
-            if (success) {
-                const tinyxml2::XMLElement *gameElement   = firstXMLChildElement(doc, nullptr, "game");
-                const tinyxml2::XMLElement *soundsElement = firstXMLChildElement(doc, gameElement, "sounds");
+            if (doc.load_buffer_inplace(xmlData, info.fileSize, pugi::parse_minimal | pugi::parse_ws_pcdata)) {
+                pugi::xml_node gameElement   = doc.child("game");
+                pugi::xml_node soundsElement = gameElement.child("sounds");
                 if (soundsElement) {
-                    const tinyxml2::XMLElement *sfxElement = firstXMLChildElement(doc, soundsElement, "soundfx");
-                    if (sfxElement) {
-                        do {
-                            const tinyxml2::XMLAttribute *nameAttr = findXMLAttribute(sfxElement, "name");
-                            const char *sfxName                    = "unknownSFX";
-                            if (nameAttr)
-                                sfxName = getXMLAttributeValueString(nameAttr);
+                    for (pugi::xml_node sfxElement = soundsElement.child("soundfx"); sfxElement; sfxElement = sfxElement.next_sibling("soundfx")) {
+                        const char *sfxName = sfxElement.attribute("name").as_string("unknownSFX");
+                        const char *sfxPath = sfxElement.attribute("path").as_string("unknownSFX.wav");
 
-                            const tinyxml2::XMLAttribute *valAttr = findXMLAttribute(sfxElement, "path");
-                            const char *sfxPath                   = "unknownSFX.wav";
-                            if (valAttr)
-                                sfxPath = getXMLAttributeValueString(valAttr);
+                        SetSfxName(sfxName, globalSFXCount);
 
-                            SetSfxName(sfxName, globalSFXCount);
-
-                            GetFileInfo(&infoStore);
-                            CloseFile();
-                            LoadSfx((char *)sfxPath, globalSFXCount);
-                            SetFileInfo(&infoStore);
-                            globalSFXCount++;
-
-                        } while ((sfxElement = nextXMLSiblingElement(doc, sfxElement, "soundfx")));
+                        GetFileInfo(&infoStore);
+                        CloseFile();
+                        LoadSfx((char *)sfxPath, globalSFXCount);
+                        SetFileInfo(&infoStore);
+                        globalSFXCount++;
                     }
                 }
             }
@@ -985,14 +872,12 @@ void RetroEngine::LoadXMLSoundFX()
                 PrintLog("Failed to parse Game.xml File!");
             }
 
-            doc->Clear();
             CloseFile();
         }
     }
 
     if (xmlData)
         delete[] xmlData;
-    delete doc;
 
     SetActiveMod(-1);
 }
@@ -1000,14 +885,11 @@ void RetroEngine::LoadXMLPlayers(TextMenu *menu)
 {
     FileInfo info;
 
-    tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
-    char *xmlData              = nullptr;
-    int xmlDataSize            = 0;
+    pugi::xml_document doc;
+    char *xmlData   = nullptr;
+    int xmlDataSize = 0;
 
     for (int m = 0; m < (int)modList.size(); ++m) {
-        // We reversed the load order to fix a bug
-        // Flip yo for real
-        // for (int m = ((int)modList.size() - 1); m >= 0; --m) {
         if (!modList[m].active)
             continue;
 
@@ -1022,26 +904,17 @@ void RetroEngine::LoadXMLPlayers(TextMenu *menu)
             FileRead(xmlData, info.fileSize);
             xmlData[info.fileSize] = 0;
 
-            bool success = doc->Parse(xmlData) == tinyxml2::XML_SUCCESS;
-
-            if (success) {
-                const tinyxml2::XMLElement *gameElement    = firstXMLChildElement(doc, nullptr, "game");
-                const tinyxml2::XMLElement *playersElement = firstXMLChildElement(doc, gameElement, "players");
+            if (doc.load_buffer_inplace(xmlData, info.fileSize, pugi::parse_minimal | pugi::parse_ws_pcdata)) {
+                pugi::xml_node gameElement    = doc.child("game");
+                pugi::xml_node playersElement = gameElement.child("players");
                 if (playersElement) {
-                    const tinyxml2::XMLElement *plrElement = firstXMLChildElement(doc, playersElement, "player");
-                    if (plrElement) {
-                        do {
-                            const tinyxml2::XMLAttribute *nameAttr = findXMLAttribute(plrElement, "name");
-                            const char *plrName                    = "unknownPlayer";
-                            if (nameAttr)
-                                plrName = getXMLAttributeValueString(nameAttr);
+                    for (pugi::xml_node plrElement = playersElement.child("player"); plrElement; plrElement = plrElement.next_sibling("player")) {
+                        const char *plrName = plrElement.attribute("name").as_string("unknownPlayer");
 
-                            if (menu)
-                                AddTextMenuEntry(menu, plrName);
-                            else
-                                StrCopy(playerNames[playerCount++], plrName);
-
-                        } while ((plrElement = nextXMLSiblingElement(doc, plrElement, "player")));
+                        if (menu)
+                            AddTextMenuEntry(menu, plrName);
+                        else
+                            StrCopy(playerNames[playerCount++], plrName);
                     }
                 }
             }
@@ -1049,14 +922,12 @@ void RetroEngine::LoadXMLPlayers(TextMenu *menu)
                 PrintLog("Failed to parse Game.xml File!");
             }
 
-            doc->Clear();
             CloseFile();
         }
     }
 
     if (xmlData)
         delete[] xmlData;
-    delete doc;
 
     SetActiveMod(-1);
 }
@@ -1064,14 +935,11 @@ void RetroEngine::LoadXMLStages(TextMenu *menu, int listNo)
 {
     FileInfo info;
 
-    tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
-    char *xmlData              = nullptr;
-    int xmlDataSize            = 0;
+    pugi::xml_document doc;
+    char *xmlData   = nullptr;
+    int xmlDataSize = 0;
 
     for (int m = 0; m < (int)modList.size(); ++m) {
-        // We reversed the load order to fix a bug
-        // Flip yo for real
-        // for (int m = ((int)modList.size() - 1); m >= 0; --m) {
         if (!modList[m].active)
             continue;
 
@@ -1086,60 +954,39 @@ void RetroEngine::LoadXMLStages(TextMenu *menu, int listNo)
             FileRead(xmlData, info.fileSize);
             xmlData[info.fileSize] = 0;
 
-            bool success = doc->Parse(xmlData) == tinyxml2::XML_SUCCESS;
-
-            if (success) {
-                const tinyxml2::XMLElement *gameElement = firstXMLChildElement(doc, nullptr, "game");
-                const char *elementNames[]              = { "presentationStages", "regularStages", "bonusStages", "specialStages" };
+            if (doc.load_buffer_inplace(xmlData, info.fileSize, pugi::parse_minimal | pugi::parse_ws_pcdata)) {
+                pugi::xml_node gameElement = doc.child("game");
+                const char *elementNames[] = { "presentationStages", "regularStages", "bonusStages", "specialStages" };
 
                 for (int l = 0; l < STAGELIST_MAX; ++l) {
-                    const tinyxml2::XMLElement *listElement = firstXMLChildElement(doc, gameElement, elementNames[l]);
+                    pugi::xml_node listElement = gameElement.child(elementNames[l]);
                     if (listElement) {
-                        const tinyxml2::XMLElement *stgElement = firstXMLChildElement(doc, listElement, "stage");
-                        if (stgElement) {
-                            do {
-                                const tinyxml2::XMLAttribute *nameAttr = findXMLAttribute(stgElement, "name");
-                                const char *stgName                    = "unknownStage";
-                                if (nameAttr)
-                                    stgName = getXMLAttributeValueString(nameAttr);
+                        for (pugi::xml_node stgElement = listElement.child("stage"); stgElement; stgElement = stgElement.next_sibling("stage")) {
+                            const char *stgName   = stgElement.attribute("name").as_string("unknownStage");
+                            const char *stgFolder = stgElement.attribute("folder").as_string("unknownStageFolder");
+                            const char *stgID     = stgElement.attribute("id").as_string("unknownStageID");
+                            bool stgHighlighted   = stgElement.attribute("highlight").as_bool(false);
 
-                                const tinyxml2::XMLAttribute *folderAttr = findXMLAttribute(stgElement, "folder");
-                                const char *stgFolder                    = "unknownStageFolder";
-                                if (nameAttr)
-                                    stgFolder = getXMLAttributeValueString(folderAttr);
-
-                                const tinyxml2::XMLAttribute *idAttr = findXMLAttribute(stgElement, "id");
-                                const char *stgID                    = "unknownStageID";
-                                if (idAttr)
-                                    stgID = getXMLAttributeValueString(idAttr);
-
-                                const tinyxml2::XMLAttribute *highlightAttr = findXMLAttribute(stgElement, "highlight");
-                                bool stgHighlighted                         = false;
-                                if (highlightAttr)
-                                    stgHighlighted = getXMLAttributeValueBool(highlightAttr);
-
-                                if (menu) {
-                                    if (listNo == 3 || listNo == 4) {
-                                        if ((listNo == 4 && l == 2) || (listNo == 3 && l == 3)) {
-                                            AddTextMenuEntry(menu, stgName);
-                                            menu->entryHighlight[menu->rowCount - 1] = stgHighlighted;
-                                        }
-                                    }
-                                    else if (listNo == l + 1) {
+                            if (menu) {
+                                if (listNo == 3 || listNo == 4) {
+                                    if ((listNo == 4 && l == 2) || (listNo == 3 && l == 3)) {
                                         AddTextMenuEntry(menu, stgName);
                                         menu->entryHighlight[menu->rowCount - 1] = stgHighlighted;
                                     }
                                 }
-                                else {
-                                    StrCopy(stageList[l][stageListCount[l]].name, stgName);
-                                    StrCopy(stageList[l][stageListCount[l]].folder, stgFolder);
-                                    StrCopy(stageList[l][stageListCount[l]].id, stgID);
-                                    stageList[l][stageListCount[l]].highlighted = stgHighlighted;
-
-                                    stageListCount[l]++;
+                                else if (listNo == l + 1) {
+                                    AddTextMenuEntry(menu, stgName);
+                                    menu->entryHighlight[menu->rowCount - 1] = stgHighlighted;
                                 }
+                            }
+                            else {
+                                StrCopy(stageList[l][stageListCount[l]].name, stgName);
+                                StrCopy(stageList[l][stageListCount[l]].folder, stgFolder);
+                                StrCopy(stageList[l][stageListCount[l]].id, stgID);
+                                stageList[l][stageListCount[l]].highlighted = stgHighlighted;
 
-                            } while ((stgElement = nextXMLSiblingElement(doc, stgElement, "stage")));
+                                stageListCount[l]++;
+                            }
                         }
                     }
                 }
@@ -1148,14 +995,12 @@ void RetroEngine::LoadXMLStages(TextMenu *menu, int listNo)
                 PrintLog("Failed to parse Game.xml File!");
             }
 
-            doc->Clear();
             CloseFile();
         }
     }
 
     if (xmlData)
         delete[] xmlData;
-    delete doc;
 
     SetActiveMod(-1);
 }

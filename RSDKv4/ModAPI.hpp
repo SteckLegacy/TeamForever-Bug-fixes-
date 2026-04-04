@@ -15,7 +15,7 @@ extern char savePath[0x100];
 #include <string>
 #include <map>
 #include <unordered_map>
-#include <tinyxml2.h>
+#include <pugixml.hpp>
 
 #define PLAYER_COUNT (0x10)
 

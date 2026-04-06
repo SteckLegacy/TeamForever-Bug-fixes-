@@ -2786,13 +2786,25 @@ void ParseScriptFile(char *scriptName, int scriptID)
         char curChar   = 0;
         int switchDeep = 0;
 
+        byte *fileBuffer = (byte *)malloc(info.vfileSize);
+        if (!fileBuffer) {
+            CloseFile();
+            return;
+        }
+        FileRead(fileBuffer, info.vfileSize);
+        int fileBufferPos = 0;
+
         while (readMode < READMODE_EOF) {
             int textPos   = 0;
             readMode      = READMODE_NORMAL;
             bool semiFlag = false;
             while (readMode < READMODE_ENDLINE) {
                 prevChar = curChar;
-                FileRead(&curChar, 1);
+                if (fileBufferPos < info.vfileSize)
+                    curChar = fileBuffer[fileBufferPos++];
+                else
+                    curChar = 0;
+
                 if (readMode == READMODE_STRING) {
                     if (curChar == '\t' || curChar == '\r' || curChar == '\n' || curChar == ';' || readMode >= READMODE_COMMENTLINE) {
                         if ((curChar == '\n' && prevChar != '\r') || (curChar == '\n' && prevChar == '\r')) {
@@ -2836,7 +2848,8 @@ void ParseScriptFile(char *scriptName, int scriptID)
                 else {
                     scriptText[textPos++] = curChar;
                 }
-                if (ReachedEndOfFile()) {
+
+                if (fileBufferPos >= info.vfileSize) {
                     scriptText[textPos] = 0;
                     readMode            = READMODE_EOF;
                 }
@@ -2846,6 +2859,8 @@ void ParseScriptFile(char *scriptName, int scriptID)
                 case PARSEMODE_SCOPELESS:
                     if (!semiFlag)
                         ++lineID;
+                    if (scriptText[0] == 0)
+                        break;
                     CheckAliasText(scriptText);
                     CheckStaticText(scriptText);
 
@@ -2929,6 +2944,8 @@ void ParseScriptFile(char *scriptName, int scriptID)
                 case PARSEMODE_PLATFORMSKIP:
                     if (!semiFlag)
                         ++lineID;
+                    if (scriptText[0] == 0)
+                        break;
                     if (!FindStringToken(scriptText, "#endplatform", 1))
                         parseMode = PARSEMODE_FUNCTION;
                     break;
@@ -2950,7 +2967,7 @@ void ParseScriptFile(char *scriptName, int scriptID)
                                 ConvertForeachStatement(scriptText);
                                 if (ConvertSwitchStatement(scriptText)) {
                                     parseMode    = PARSEMODE_SWITCHREAD;
-                                    info.readPos = (int)GetFilePosition();
+                                    info.readPos = fileBufferPos;
                                     switchDeep   = 0;
                                 }
                                 ConvertArithmaticSyntax(scriptText);
@@ -2995,7 +3012,7 @@ void ParseScriptFile(char *scriptName, int scriptID)
                         CheckCaseNumber(scriptText);
                     }
                     else {
-                        SetFilePosition(info.readPos);
+                        fileBufferPos = info.readPos;
                         parseMode  = PARSEMODE_FUNCTION;
                         int jPos   = jumpTableStack[jumpTableStackPos];
                         switchDeep = abs(jumpTableData[jPos + 1] - jumpTableData[jPos]) + 1;
@@ -3005,6 +3022,8 @@ void ParseScriptFile(char *scriptName, int scriptID)
                 case PARSEMODE_TABLEREAD:
                     if (!semiFlag)
                         ++lineID;
+                    if (scriptText[0] == 0)
+                        break;
                     if (FindStringToken(scriptText, "endtable", 1)) {
                         ReadTableValues(scriptText);
                     }
@@ -3045,6 +3064,7 @@ void ParseScriptFile(char *scriptName, int scriptID)
             }
         }
 
+        free(fileBuffer);
         CloseFile();
     }
 }
@@ -3068,30 +3088,29 @@ void LoadBytecode(int stageListID, int scriptID)
 
     FileInfo info;
     if (LoadFile(scriptPath, &info)) {
-        byte fileBuffer = 0;
-        int *scrData    = &scriptData[scriptCodePos];
-        FileRead(&fileBuffer, 1);
-        int scriptCodeCount = fileBuffer;
-        FileRead(&fileBuffer, 1);
-        scriptCodeCount += (fileBuffer << 8);
-        FileRead(&fileBuffer, 1);
-        scriptCodeCount += (fileBuffer << 16);
-        FileRead(&fileBuffer, 1);
-        scriptCodeCount += (fileBuffer << 24);
+        byte *fileBuffer = (byte *)malloc(info.vfileSize);
+        if (!fileBuffer) {
+            CloseFile();
+            return;
+        }
+        FileRead(fileBuffer, info.vfileSize);
+        int fileBufferPos = 0;
+
+        int *scrData        = &scriptData[scriptCodePos];
+        int scriptCodeCount = fileBuffer[fileBufferPos++];
+        scriptCodeCount += (fileBuffer[fileBufferPos++] << 8);
+        scriptCodeCount += (fileBuffer[fileBufferPos++] << 16);
+        scriptCodeCount += (fileBuffer[fileBufferPos++] << 24);
 
         while (scriptCodeCount > 0) {
-            FileRead(&fileBuffer, 1);
-            int blockSize = fileBuffer & 0x7F;
-            if (fileBuffer >= 0x80) {
+            byte blockSizeRaw = fileBuffer[fileBufferPos++];
+            int blockSize     = blockSizeRaw & 0x7F;
+            if (blockSizeRaw >= 0x80) {
                 while (blockSize > 0) {
-                    FileRead(&fileBuffer, 1);
-                    int data = fileBuffer;
-                    FileRead(&fileBuffer, 1);
-                    data += fileBuffer << 8;
-                    FileRead(&fileBuffer, 1);
-                    data += fileBuffer << 16;
-                    FileRead(&fileBuffer, 1);
-                    data += fileBuffer << 24;
+                    int data = fileBuffer[fileBufferPos++];
+                    data += fileBuffer[fileBufferPos++] << 8;
+                    data += fileBuffer[fileBufferPos++] << 16;
+                    data += fileBuffer[fileBufferPos++] << 24;
                     *scrData = data;
                     ++scrData;
                     ++scriptCodePos;
@@ -3101,8 +3120,7 @@ void LoadBytecode(int stageListID, int scriptID)
             }
             else {
                 while (blockSize > 0) {
-                    FileRead(&fileBuffer, 1);
-                    *scrData = fileBuffer;
+                    *scrData = fileBuffer[fileBufferPos++];
                     ++scrData;
                     ++scriptCodePos;
                     --scriptCodeCount;
@@ -3111,29 +3129,21 @@ void LoadBytecode(int stageListID, int scriptID)
             }
         }
 
-        int *jumpPtr = &jumpTableData[jumpTablePos];
-        FileRead(&fileBuffer, 1);
-        int jumpDataCnt = fileBuffer;
-        FileRead(&fileBuffer, 1);
-        jumpDataCnt += fileBuffer << 8;
-        FileRead(&fileBuffer, 1);
-        jumpDataCnt += fileBuffer << 16;
-        FileRead(&fileBuffer, 1);
-        jumpDataCnt += fileBuffer << 24;
+        int *jumpPtr    = &jumpTableData[jumpTablePos];
+        int jumpDataCnt = fileBuffer[fileBufferPos++];
+        jumpDataCnt += fileBuffer[fileBufferPos++] << 8;
+        jumpDataCnt += fileBuffer[fileBufferPos++] << 16;
+        jumpDataCnt += fileBuffer[fileBufferPos++] << 24;
 
         while (jumpDataCnt > 0) {
-            FileRead(&fileBuffer, 1);
-            int blockSize = fileBuffer & 0x7F;
-            if (fileBuffer >= 0x80) {
+            byte blockSizeRaw = fileBuffer[fileBufferPos++];
+            int blockSize     = blockSizeRaw & 0x7F;
+            if (blockSizeRaw >= 0x80) {
                 while (blockSize > 0) {
-                    FileRead(&fileBuffer, 1);
-                    int data = fileBuffer;
-                    FileRead(&fileBuffer, 1);
-                    data += fileBuffer << 8;
-                    FileRead(&fileBuffer, 1);
-                    data += fileBuffer << 16;
-                    FileRead(&fileBuffer, 1);
-                    data += fileBuffer << 24;
+                    int data = fileBuffer[fileBufferPos++];
+                    data += fileBuffer[fileBufferPos++] << 8;
+                    data += fileBuffer[fileBufferPos++] << 16;
+                    data += fileBuffer[fileBufferPos++] << 24;
                     *jumpPtr = data;
                     ++jumpPtr;
                     ++jumpTablePos;
@@ -3143,8 +3153,7 @@ void LoadBytecode(int stageListID, int scriptID)
             }
             else {
                 while (blockSize > 0) {
-                    FileRead(&fileBuffer, 1);
-                    *jumpPtr = fileBuffer;
+                    *jumpPtr = fileBuffer[fileBufferPos++];
                     ++jumpPtr;
                     ++jumpTablePos;
                     --jumpDataCnt;
@@ -3152,99 +3161,65 @@ void LoadBytecode(int stageListID, int scriptID)
                 }
             }
         }
-        FileRead(&fileBuffer, 1);
-        int scriptCount = fileBuffer;
-        FileRead(&fileBuffer, 1);
-        scriptCount += fileBuffer << 8;
+
+        int scriptCount = fileBuffer[fileBufferPos++];
+        scriptCount += fileBuffer[fileBufferPos++] << 8;
 
         int objType = scriptID;
         for (int i = 0; i < scriptCount; ++i) {
 
-            FileRead(&fileBuffer, 1);
-            int buf = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 8);
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 16);
-            FileRead(&fileBuffer, 1);
-            objectScriptList[objType].eventMain.scriptCodePtr = buf + (fileBuffer << 24);
+            int buf = fileBuffer[fileBufferPos++];
+            buf += (fileBuffer[fileBufferPos++] << 8);
+            buf += (fileBuffer[fileBufferPos++] << 16);
+            objectScriptList[objType].eventMain.scriptCodePtr = buf + (fileBuffer[fileBufferPos++] << 24);
 
-            FileRead(&fileBuffer, 1);
-            buf = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 8);
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 16);
-            FileRead(&fileBuffer, 1);
-            objectScriptList[objType].eventDraw.scriptCodePtr = buf + (fileBuffer << 24);
+            buf = fileBuffer[fileBufferPos++];
+            buf += (fileBuffer[fileBufferPos++] << 8);
+            buf += (fileBuffer[fileBufferPos++] << 16);
+            objectScriptList[objType].eventDraw.scriptCodePtr = buf + (fileBuffer[fileBufferPos++] << 24);
 
-            FileRead(&fileBuffer, 1);
-            buf = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 8);
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 16);
-            FileRead(&fileBuffer, 1);
-            objectScriptList[objType++].eventStartup.scriptCodePtr = buf + (fileBuffer << 24);
+            buf = fileBuffer[fileBufferPos++];
+            buf += (fileBuffer[fileBufferPos++] << 8);
+            buf += (fileBuffer[fileBufferPos++] << 16);
+            objectScriptList[objType++].eventStartup.scriptCodePtr = buf + (fileBuffer[fileBufferPos++] << 24);
         }
 
         objType = scriptID;
         for (int i = 0; i < scriptCount; ++i) {
-            FileRead(&fileBuffer, 1);
-            int buf = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 8);
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 16);
-            FileRead(&fileBuffer, 1);
-            objectScriptList[objType].eventMain.jumpTablePtr = buf + (fileBuffer << 24);
+            int buf = fileBuffer[fileBufferPos++];
+            buf += (fileBuffer[fileBufferPos++] << 8);
+            buf += (fileBuffer[fileBufferPos++] << 16);
+            objectScriptList[objType].eventMain.jumpTablePtr = buf + (fileBuffer[fileBufferPos++] << 24);
 
-            FileRead(&fileBuffer, 1);
-            buf = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 8);
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 16);
-            FileRead(&fileBuffer, 1);
-            objectScriptList[objType].eventDraw.jumpTablePtr = buf + (fileBuffer << 24);
+            buf = fileBuffer[fileBufferPos++];
+            buf += (fileBuffer[fileBufferPos++] << 8);
+            buf += (fileBuffer[fileBufferPos++] << 16);
+            objectScriptList[objType].eventDraw.jumpTablePtr = buf + (fileBuffer[fileBufferPos++] << 24);
 
-            FileRead(&fileBuffer, 1);
-            buf = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 8);
-            FileRead(&fileBuffer, 1);
-            buf += (fileBuffer << 16);
-            FileRead(&fileBuffer, 1);
-            objectScriptList[objType++].eventStartup.jumpTablePtr = buf + (fileBuffer << 24);
+            buf = fileBuffer[fileBufferPos++];
+            buf += (fileBuffer[fileBufferPos++] << 8);
+            buf += (fileBuffer[fileBufferPos++] << 16);
+            objectScriptList[objType++].eventStartup.jumpTablePtr = buf + (fileBuffer[fileBufferPos++] << 24);
         }
 
-        FileRead(&fileBuffer, 1);
-        int functionCount = fileBuffer;
-        FileRead(&fileBuffer, 1);
-        functionCount += fileBuffer << 8;
+        int functionCount = fileBuffer[fileBufferPos++];
+        functionCount += fileBuffer[fileBufferPos++] << 8;
 
         for (int i = 0; i < functionCount; ++i) {
-            FileRead(&fileBuffer, 1);
-            int scrPos = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            scrPos += (fileBuffer << 8);
-            FileRead(&fileBuffer, 1);
-            scrPos += (fileBuffer << 16);
-            FileRead(&fileBuffer, 1);
-            functionScriptList[i].scriptCodePtr = scrPos + (fileBuffer << 24);
+            int scrPos = fileBuffer[fileBufferPos++];
+            scrPos += (fileBuffer[fileBufferPos++] << 8);
+            scrPos += (fileBuffer[fileBufferPos++] << 16);
+            functionScriptList[i].scriptCodePtr = scrPos + (fileBuffer[fileBufferPos++] << 24);
         }
 
         for (int i = 0; i < functionCount; ++i) {
-            FileRead(&fileBuffer, 1);
-            int jmpPos = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            jmpPos += (fileBuffer << 8);
-            FileRead(&fileBuffer, 1);
-            jmpPos += (fileBuffer << 16);
-            FileRead(&fileBuffer, 1);
-            functionScriptList[i].jumpTablePtr = jmpPos + (fileBuffer << 24);
+            int jmpPos = fileBuffer[fileBufferPos++];
+            jmpPos += (fileBuffer[fileBufferPos++] << 8);
+            jmpPos += (fileBuffer[fileBufferPos++] << 16);
+            functionScriptList[i].jumpTablePtr = jmpPos + (fileBuffer[fileBufferPos++] << 24);
         }
 
+        free(fileBuffer);
         CloseFile();
     }
 }

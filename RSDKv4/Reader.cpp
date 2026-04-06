@@ -475,11 +475,19 @@ void FileRead(void *dest, int size)
         }
         else {
             while (size > 0) {
-                if (bufferPosition == readSize)
-                    FillFileBuffer();
+                if (bufferPosition == readSize) {
+                    if (FillFileBuffer() == 0)
+                        break;
+                }
 
-                *data++ = fileBuffer[bufferPosition++];
-                size--;
+                int copySize = readSize - bufferPosition;
+                if (size < copySize)
+                    copySize = size;
+
+                memcpy(data, &fileBuffer[bufferPosition], copySize);
+                data += copySize;
+                bufferPosition += copySize;
+                size -= copySize;
             }
         }
     }
@@ -539,10 +547,17 @@ void FileSkip(int count)
         }
         else {
             while (count > 0) {
-                if (bufferPosition == readSize)
-                    FillFileBuffer();
-                bufferPosition++;
-                count--;
+                if (bufferPosition == readSize) {
+                    if (FillFileBuffer() == 0)
+                        break;
+                }
+
+                int skipSize = readSize - bufferPosition;
+                if (count < skipSize)
+                    skipSize = count;
+
+                bufferPosition += skipSize;
+                count -= skipSize;
             }
         }
     }

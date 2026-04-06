@@ -113,13 +113,15 @@ void LoadTextFile(TextMenu *menu, const char *filePath, byte mapCode)
 
                 if (val != '\n') {
                     if (val == '\r') {
-                        menu->rowCount += 1;
-                        if (menu->rowCount > 511) {
-                            flag = true;
-                        }
-                        else {
-                            menu->entryStart[menu->rowCount] = menu->textDataPos;
-                            menu->entrySize[menu->rowCount]  = 0;
+                        if (menu->entrySize[menu->rowCount] > 0) {
+                            menu->rowCount += 1;
+                            if (menu->rowCount > 511) {
+                                flag = true;
+                            }
+                            else {
+                                menu->entryStart[menu->rowCount] = menu->textDataPos;
+                                menu->entrySize[menu->rowCount]  = 0;
+                            }
                         }
                     }
                     else {
@@ -153,9 +155,11 @@ void LoadTextFile(TextMenu *menu, const char *filePath, byte mapCode)
             ushort val = fileBuffer;
             if (val != '\n') {
                 if (val == '\r') {
-                    menu->rowCount++;
-                    menu->entryStart[menu->rowCount] = menu->textDataPos;
-                    menu->entrySize[menu->rowCount]  = 0;
+                    if (menu->entrySize[menu->rowCount] > 0) {
+                        menu->rowCount++;
+                        menu->entryStart[menu->rowCount] = menu->textDataPos;
+                        menu->entrySize[menu->rowCount]  = 0;
+                    }
                 }
                 else {
                     if (mapCode) {
@@ -183,13 +187,15 @@ void LoadTextFile(TextMenu *menu, const char *filePath, byte mapCode)
                 val = fileBuffer;
                 if (val != '\n') {
                     if (val == '\r') {
-                        menu->rowCount++;
-                        if (menu->rowCount > 511) {
-                            flag = true;
-                        }
-                        else {
-                            menu->entryStart[menu->rowCount] = menu->textDataPos;
-                            menu->entrySize[menu->rowCount]  = 0;
+                        if (menu->entrySize[menu->rowCount] > 0) {
+                            menu->rowCount++;
+                            if (menu->rowCount > 511) {
+                                flag = true;
+                            }
+                            else {
+                                menu->entryStart[menu->rowCount] = menu->textDataPos;
+                                menu->entrySize[menu->rowCount]  = 0;
+                            }
                         }
                     }
                     else {
@@ -223,9 +229,11 @@ void LoadTextFile(TextMenu *menu, const char *filePath, byte mapCode)
             FileRead(&fileBuffer, 1);
             if (fileBuffer != '\n') {
                 if (fileBuffer == '\r') {
-                    menu->rowCount++;
-                    menu->entryStart[menu->rowCount] = menu->textDataPos;
-                    menu->entrySize[menu->rowCount]  = 0;
+                    if (menu->entrySize[menu->rowCount] > 0) {
+                        menu->rowCount++;
+                        menu->entryStart[menu->rowCount] = menu->textDataPos;
+                        menu->entrySize[menu->rowCount]  = 0;
+                    }
                 }
                 else {
                     menu->textData[menu->textDataPos++] = fileBuffer;
@@ -235,7 +243,8 @@ void LoadTextFile(TextMenu *menu, const char *filePath, byte mapCode)
         }
 #endif
 
-        menu->rowCount++;
+        if (menu->entrySize[menu->rowCount] > 0)
+            menu->rowCount++;
         CloseFile();
     }
 }

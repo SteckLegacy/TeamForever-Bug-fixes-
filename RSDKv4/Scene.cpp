@@ -597,7 +597,7 @@ void LoadStageFiles(void)
 {
     FileInfo infoStore;
     FileInfo info;
-    byte fileBuffer  = 0;
+    byte readBuffer[4];
     byte fileBuffer2 = 0;
     int scriptID     = 1;
     char strBuffer[0x100];
@@ -622,10 +622,10 @@ void LoadStageFiles(void)
         }
 
         if (LoadFile("Data/Game/GameConfig.bin", &info)) {
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
+            FileRead(readBuffer, 1);
+            FileRead(strBuffer, readBuffer[0]);
+            FileRead(readBuffer, 1);
+            FileRead(strBuffer, readBuffer[0]);
 
             byte buf[3];
             for (int c = 0; c < 0x60; ++c) {
@@ -633,15 +633,15 @@ void LoadStageFiles(void)
                 SetPaletteEntry(-1, c, buf[0], buf[1], buf[2]);
             }
 
-			if (loadGlobalScripts) {
-				byte globalObjectCount = 0;
-				FileRead(&globalObjectCount, 1);
-				for (byte i = 0; i < globalObjectCount; ++i) {
-					FileRead(&fileBuffer2, 1);
-					FileRead(strBuffer, fileBuffer2);
-					strBuffer[fileBuffer2] = 0;
-					SetObjectTypeName(strBuffer, scriptID + i);
-				}
+            if (loadGlobalScripts) {
+                byte globalObjectCount = 0;
+                FileRead(&globalObjectCount, 1);
+                for (byte i = 0; i < globalObjectCount; ++i) {
+                    FileRead(&fileBuffer2, 1);
+                    FileRead(strBuffer, fileBuffer2);
+                    strBuffer[fileBuffer2] = 0;
+                    SetObjectTypeName(strBuffer, scriptID + i);
+                }
 
 #if RETRO_USE_MOD_LOADER && RETRO_USE_COMPILER
 				for (byte i = 0; i < modObjCount && loadGlobalScripts; ++i) {
@@ -943,14 +943,14 @@ void LoadActLayout()
             FileRead(fileBuffer, 1);
             object->propertyValue = fileBuffer[0];
 
-            FileRead(&fileBuffer, 4);
+            FileRead(fileBuffer, 4);
             object->xpos = (fileBuffer[3] << 24) + (fileBuffer[2] << 16) + (fileBuffer[1] << 8) + fileBuffer[0];
 
-            FileRead(&fileBuffer, 4);
+            FileRead(fileBuffer, 4);
             object->ypos = (fileBuffer[3] << 24) + (fileBuffer[2] << 16) + (fileBuffer[1] << 8) + fileBuffer[0];
 
             if (attribs & 0x1) {
-                FileRead(&fileBuffer, 4);
+                FileRead(fileBuffer, 4);
                 object->state = (fileBuffer[3] << 24) + (fileBuffer[2] << 16) + (fileBuffer[1] << 8) + fileBuffer[0];
             }
             if (attribs & 0x2) {
@@ -958,11 +958,11 @@ void LoadActLayout()
                 object->direction = fileBuffer[0];
             }
             if (attribs & 0x4) {
-                FileRead(&fileBuffer, 4);
+                FileRead(fileBuffer, 4);
                 object->scale = (fileBuffer[3] << 24) + (fileBuffer[2] << 16) + (fileBuffer[1] << 8) + fileBuffer[0];
             }
             if (attribs & 0x8) {
-                FileRead(&fileBuffer, 4);
+                FileRead(fileBuffer, 4);
                 object->rotation = (fileBuffer[3] << 24) + (fileBuffer[2] << 16) + (fileBuffer[1] << 8) + fileBuffer[0];
             }
             if (attribs & 0x10) {
@@ -982,7 +982,7 @@ void LoadActLayout()
                 object->animation = fileBuffer[0];
             }
             if (attribs & 0x100) {
-                FileRead(&fileBuffer, 4);
+                FileRead(fileBuffer, 4);
                 object->animationSpeed = (fileBuffer[3] << 24) + (fileBuffer[2] << 16) + (fileBuffer[1] << 8) + fileBuffer[0];
             }
             if (attribs & 0x200) {
@@ -994,19 +994,19 @@ void LoadActLayout()
                 object->inkEffect = fileBuffer[0];
             }
             if (attribs & 0x800) {
-                FileRead(&fileBuffer, 4);
+                FileRead(fileBuffer, 4);
                 object->values[0] = (fileBuffer[3] << 24) + (fileBuffer[2] << 16) + (fileBuffer[1] << 8) + fileBuffer[0];
             }
             if (attribs & 0x1000) {
-                FileRead(&fileBuffer, 4);
+                FileRead(fileBuffer, 4);
                 object->values[1] = (fileBuffer[3] << 24) + (fileBuffer[2] << 16) + (fileBuffer[1] << 8) + fileBuffer[0];
             }
             if (attribs & 0x2000) {
-                FileRead(&fileBuffer, 4);
+                FileRead(fileBuffer, 4);
                 object->values[2] = (fileBuffer[3] << 24) + (fileBuffer[2] << 16) + (fileBuffer[1] << 8) + fileBuffer[0];
             }
             if (attribs & 0x4000) {
-                FileRead(&fileBuffer, 4);
+                FileRead(fileBuffer, 4);
                 object->values[3] = (fileBuffer[3] << 24) + (fileBuffer[2] << 16) + (fileBuffer[1] << 8) + fileBuffer[0];
             }
 
@@ -1129,7 +1129,7 @@ void LoadStageChunks()
 
     if (LoadStageFile("128x128Tiles.bin", stageListPosition, &info)) {
         for (int i = 0; i < CHUNKTILE_COUNT; ++i) {
-            FileRead(&entry, 3);
+            FileRead(entry, 3);
             entry[0] -= (byte)((entry[0] >> 6) << 6);
 
             tiles128x128.visualPlane[i] = (byte)(entry[0] >> 4);

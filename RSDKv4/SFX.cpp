@@ -14,7 +14,7 @@ void LoadGlobalSfx()
     FileInfo info;
     FileInfo infoStore;
     char strBuffer[0x100];
-    byte fileBuffer = 0;
+    byte fileBuffer[4];
     int fileBuffer2 = 0;
 
     globalSFXCount = 0;
@@ -22,11 +22,11 @@ void LoadGlobalSfx()
     if (LoadFile("Data/Game/GameConfig.bin", &info)) {
         infoStore = info;
 
-        FileRead(&fileBuffer, 1);
-        FileRead(strBuffer, fileBuffer);
+        FileRead(fileBuffer, 1);
+        FileRead(strBuffer, fileBuffer[0]);
 
-        FileRead(&fileBuffer, 1);
-        FileRead(strBuffer, fileBuffer);
+        FileRead(fileBuffer, 1);
+        FileRead(strBuffer, fileBuffer[0]);
 
         byte buf[3];
         for (int c = 0; c < 0x60; ++c) FileRead(buf, 3);
@@ -35,41 +35,41 @@ void LoadGlobalSfx()
         byte objectCount = 0;
         FileRead(&objectCount, 1);
         for (byte o = 0; o < objectCount; ++o) {
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
         }
 
         // Read Script Paths
         for (byte s = 0; s < objectCount; ++s) {
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
         }
 
         byte varCount = 0;
         FileRead(&varCount, 1);
         for (byte v = 0; v < varCount; ++v) {
             // Read Variable Name
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
 
             // Read Variable Value
             FileRead(&fileBuffer2, 4);
         }
 
         // Read SFX
-        FileRead(&fileBuffer, 1);
-        globalSFXCount = fileBuffer;
+        FileRead(fileBuffer, 1);
+        globalSFXCount = fileBuffer[0];
         for (byte s = 0; s < globalSFXCount; ++s) { // SFX Names
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
-            strBuffer[fileBuffer] = 0;
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
+            strBuffer[fileBuffer[0]] = 0;
 
             SetSfxName(strBuffer, s);
         }
         for (byte s = 0; s < globalSFXCount; ++s) { // SFX Paths
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
-            strBuffer[fileBuffer] = 0;
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
+            strBuffer[fileBuffer[0]] = 0;
 
             GetFileInfo(&infoStore);
             CloseFile();

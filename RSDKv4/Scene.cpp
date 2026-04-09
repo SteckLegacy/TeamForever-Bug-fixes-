@@ -720,7 +720,7 @@ void LoadStageFiles(void)
 
             byte clr[3];
             for (int i = 0x60; i < 0x80; ++i) {
-                FileRead(&clr, 3);
+                FileRead(clr, 3);
                 SetPaletteEntry(-1, i, clr[0], clr[1], clr[2]);
             }
 
@@ -1361,9 +1361,10 @@ void LoadStageGIFFile(int stageID)
         bool interlaced = (fileBuffer & 0x40) >> 6;
         if ((unsigned int)fileBuffer >> 7 == 1) {
             int c = 128;
+            byte clr[3];
             do {
                 ++c;
-                FileRead(&fileBuffer, 3);
+                FileRead(clr, 3);
             } while (c != 256);
         }
 

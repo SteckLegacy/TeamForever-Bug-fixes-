@@ -43,10 +43,10 @@ TITLE		:=	SonicAbsolute
 APPID		:=	S2A00S1F0
 CONTENTID	:=	UP0001-$(APPID)_00-SONIC2ABSOLUTE00
 
-CFLAGS		=	-O3 -ffast-math -fno-strict-aliasing -funroll-loops -fomit-frame-pointer -mno-update -flto -DPS3 -D__PS3__ -DS2A_BUILD -DPS3_DISABLE_NETWORKING -Wall -mcpu=cell -mbig-endian $(MACHDEP) $(INCLUDE) $(INCLUDE) -include ps3_compat.h
+CFLAGS		=	-O3 -ffast-math -fno-strict-aliasing -funroll-loops -fomit-frame-pointer -mno-update -DPS3 -D__PS3__ -DS2A_BUILD -DPS3_DISABLE_NETWORKING -Wall -mcpu=cell -mbig-endian $(MACHDEP) $(INCLUDE) $(INCLUDE) -include ps3_compat.h
 CXXFLAGS	=	$(CFLAGS) -std=c++17 -DPS3_DISABLE_NETWORKING -DS2A_BUILD
 
-LDFLAGS		=	-flto -Wl,--gc-sections -s -Wl,--strip-all -Wl,--sort-common=descending $(MACHDEP) -Wl,-Map,$(notdir $@).map
+LDFLAGS		=	-Wl,--gc-sections -s -Wl,--strip-all -Wl,--sort-common=descending $(MACHDEP) -Wl,-Map,$(notdir $@).map
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project

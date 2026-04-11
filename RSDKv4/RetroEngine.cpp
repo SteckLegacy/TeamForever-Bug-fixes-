@@ -1009,8 +1009,8 @@ void RetroEngine::LoadXMLStages(TextMenu *menu, int listNo)
 bool RetroEngine::LoadGameConfig(const char *filePath)
 {
     FileInfo info;
-    byte fileBuffer  = 0;
-    byte fileBuffer2 = 0;
+    byte fileBuffer[4];
+    byte fileBuffer2[4];
     char strBuffer[0x40];
     StrCopy(gameWindowText, "Retro-Engine"); // this is the default window name
 
@@ -1021,13 +1021,13 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
 
     bool loaded = LoadFile(filePath, &info);
     if (loaded) {
-        FileRead(&fileBuffer, 1);
-        FileRead(gameWindowText, fileBuffer);
-        gameWindowText[fileBuffer] = 0;
+        FileRead(fileBuffer, 1);
+        FileRead(gameWindowText, fileBuffer[0]);
+        gameWindowText[fileBuffer[0]] = 0;
 
-        FileRead(&fileBuffer, 1);
-        FileRead(gameDescriptionText, fileBuffer);
-        gameDescriptionText[fileBuffer] = 0;
+        FileRead(fileBuffer, 1);
+        FileRead(gameDescriptionText, fileBuffer[0]);
+        gameDescriptionText[fileBuffer[0]] = 0;
 
         byte buf[3];
         for (int c = 0; c < 0x60; ++c) {
@@ -1039,14 +1039,14 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
         byte objectCount = 0;
         FileRead(&objectCount, 1);
         for (byte o = 0; o < objectCount; ++o) {
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
         }
 
         // Read Script Paths
         for (byte s = 0; s < objectCount; ++s) {
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
         }
 
         byte varCount = 0;
@@ -1054,45 +1054,45 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
         globalVariablesCount = varCount;
         for (int v = 0; v < varCount; ++v) {
             // Read Variable Name
-            FileRead(&fileBuffer, 1);
-            FileRead(&globalVariableNames[v], fileBuffer);
-            globalVariableNames[v][fileBuffer] = 0;
+            FileRead(fileBuffer, 1);
+            FileRead(globalVariableNames[v], fileBuffer[0]);
+            globalVariableNames[v][fileBuffer[0]] = 0;
 
             // Read Variable Value
-            FileRead(&fileBuffer2, 1);
-            globalVariables[v] = fileBuffer2 << 0;
-            FileRead(&fileBuffer2, 1);
-            globalVariables[v] += fileBuffer2 << 8;
-            FileRead(&fileBuffer2, 1);
-            globalVariables[v] += fileBuffer2 << 16;
-            FileRead(&fileBuffer2, 1);
-            globalVariables[v] += fileBuffer2 << 24;
+            FileRead(fileBuffer2, 1);
+            globalVariables[v] = fileBuffer2[0] << 0;
+            FileRead(fileBuffer2, 1);
+            globalVariables[v] += fileBuffer2[0] << 8;
+            FileRead(fileBuffer2, 1);
+            globalVariables[v] += fileBuffer2[0] << 16;
+            FileRead(fileBuffer2, 1);
+            globalVariables[v] += fileBuffer2[0] << 24;
         }
 
         // Read SFX
         byte globalSFXCount = 0;
         FileRead(&globalSFXCount, 1);
         for (int s = 0; s < globalSFXCount; ++s) { // SFX Names
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
-            strBuffer[fileBuffer] = 0;
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
+            strBuffer[fileBuffer[0]] = 0;
         }
         for (byte s = 0; s < globalSFXCount; ++s) { // SFX Paths
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
-            strBuffer[fileBuffer] = 0;
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
+            strBuffer[fileBuffer[0]] = 0;
         }
 
         // Read Player Names
         byte plrCount = 0;
         FileRead(&plrCount, 1);
         for (byte p = 0; p < plrCount; ++p) {
-            FileRead(&fileBuffer, 1);
-            FileRead(&strBuffer, fileBuffer);
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
 
             // needed for PlayerName[] stuff in scripts
 #if !RETRO_USE_ORIGINAL_CODE
-            strBuffer[fileBuffer] = 0;
+            strBuffer[fileBuffer[0]] = 0;
             StrCopy(playerNames[p], strBuffer);
             playerCount++;
 #endif
@@ -1106,28 +1106,28 @@ bool RetroEngine::LoadGameConfig(const char *filePath)
             else if (c == 3)
                 cat = 2;
             stageListCount[cat] = 0;
-            FileRead(&fileBuffer, 1);
-            stageListCount[cat] = fileBuffer;
+            FileRead(fileBuffer, 1);
+            stageListCount[cat] = fileBuffer[0];
             for (byte s = 0; s < stageListCount[cat]; ++s) {
 
                 // Read Stage Folder
-                FileRead(&fileBuffer, 1);
-                FileRead(&stageList[cat][s].folder, fileBuffer);
-                stageList[cat][s].folder[fileBuffer] = 0;
+                FileRead(fileBuffer, 1);
+                FileRead(stageList[cat][s].folder, fileBuffer[0]);
+                stageList[cat][s].folder[fileBuffer[0]] = 0;
 
                 // Read Stage ID
-                FileRead(&fileBuffer, 1);
-                FileRead(&stageList[cat][s].id, fileBuffer);
-                stageList[cat][s].id[fileBuffer] = 0;
+                FileRead(fileBuffer, 1);
+                FileRead(stageList[cat][s].id, fileBuffer[0]);
+                stageList[cat][s].id[fileBuffer[0]] = 0;
 
                 // Read Stage Name
-                FileRead(&fileBuffer, 1);
-                FileRead(&stageList[cat][s].name, fileBuffer);
-                stageList[cat][s].name[fileBuffer] = 0;
+                FileRead(fileBuffer, 1);
+                FileRead(stageList[cat][s].name, fileBuffer[0]);
+                stageList[cat][s].name[fileBuffer[0]] = 0;
 
                 // Read Stage Mode
-                FileRead(&fileBuffer, 1);
-                stageList[cat][s].highlighted = fileBuffer;
+                FileRead(fileBuffer, 1);
+                stageList[cat][s].highlighted = fileBuffer[0];
             }
         }
 

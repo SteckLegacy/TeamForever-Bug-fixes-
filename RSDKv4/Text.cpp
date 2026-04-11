@@ -12,76 +12,76 @@ FontCharacter fontCharacterList[FONTCHAR_COUNT];
 
 void LoadFontFile(const char *filePath)
 {
-    byte fileBuffer = 0;
+    byte fileBuffer[4];
     int cnt         = 0;
     FileInfo info;
     if (LoadFile(filePath, &info)) {
         while (!ReachedEndOfFile()) {
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].id = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].id += fileBuffer << 8;
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].id += fileBuffer << 16;
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].id += fileBuffer << 24;
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].id = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].id += fileBuffer[0] << 8;
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].id += fileBuffer[0] << 16;
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].id += fileBuffer[0] << 24;
 
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].srcX = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].srcX += fileBuffer << 8;
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].srcX = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].srcX += fileBuffer[0] << 8;
 
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].srcY = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].srcY += fileBuffer << 8;
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].srcY = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].srcY += fileBuffer[0] << 8;
 
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].width = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].width += fileBuffer << 8;
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].width = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].width += fileBuffer[0] << 8;
 
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].height = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].height += fileBuffer << 8;
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].height = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].height += fileBuffer[0] << 8;
 
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].pivotX = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            if (fileBuffer > 0x80) {
-                fontCharacterList[cnt].pivotX += (fileBuffer - 0x80) << 8;
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].pivotX = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            if (fileBuffer[0] > 0x80) {
+                fontCharacterList[cnt].pivotX += (fileBuffer[0] - 0x80) << 8;
                 fontCharacterList[cnt].pivotX += -0x8000;
             }
             else {
-                fontCharacterList[cnt].pivotX += fileBuffer << 8;
+                fontCharacterList[cnt].pivotX += fileBuffer[0] << 8;
             }
 
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].pivotY = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            if (fileBuffer > 0x80) {
-                fontCharacterList[cnt].pivotY += (fileBuffer - 0x80) << 8;
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].pivotY = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            if (fileBuffer[0] > 0x80) {
+                fontCharacterList[cnt].pivotY += (fileBuffer[0] - 0x80) << 8;
                 fontCharacterList[cnt].pivotY += -0x8000;
             }
             else {
-                fontCharacterList[cnt].pivotY += fileBuffer << 8;
+                fontCharacterList[cnt].pivotY += fileBuffer[0] << 8;
             }
 
-            FileRead(&fileBuffer, 1);
-            fontCharacterList[cnt].xAdvance = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            if (fileBuffer > 0x80) {
-                fontCharacterList[cnt].xAdvance += (fileBuffer - 0x80) << 8;
+            FileRead(fileBuffer, 1);
+            fontCharacterList[cnt].xAdvance = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            if (fileBuffer[0] > 0x80) {
+                fontCharacterList[cnt].xAdvance += (fileBuffer[0] - 0x80) << 8;
                 fontCharacterList[cnt].xAdvance += -0x8000;
             }
             else {
-                fontCharacterList[cnt].xAdvance += fileBuffer << 8;
+                fontCharacterList[cnt].xAdvance += fileBuffer[0] << 8;
             }
 
             // Unused
-            FileRead(&fileBuffer, 1);
-            FileRead(&fileBuffer, 1);
+            FileRead(fileBuffer, 1);
+            FileRead(fileBuffer, 1);
             cnt++;
         }
         CloseFile();
@@ -92,7 +92,7 @@ void LoadFontFile(const char *filePath)
 void LoadTextFile(TextMenu *menu, const char *filePath, byte mapCode)
 {
     FileInfo info;
-    byte fileBuffer = 0;
+    byte fileBuffer[4];
     if (LoadFile(filePath, &info)) {
         menu->textDataPos                = 0;
         menu->rowCount                   = 0;
@@ -101,15 +101,15 @@ void LoadTextFile(TextMenu *menu, const char *filePath, byte mapCode)
 
 #if RETRO_REV00 || RETRO_REV01
         bool flag = false;
-        FileRead(&fileBuffer, 1);
-        if (fileBuffer == 0xFF) {
-            FileRead(&fileBuffer, 1);
+        FileRead(fileBuffer, 1);
+        if (fileBuffer[0] == 0xFF) {
+            FileRead(fileBuffer, 1);
             while (!flag) {
                 ushort val = 0;
-                FileRead(&fileBuffer, 1);
-                val = fileBuffer;
-                FileRead(&fileBuffer, 1);
-                val |= fileBuffer << 8;
+                FileRead(fileBuffer, 1);
+                val = fileBuffer[0];
+                FileRead(fileBuffer, 1);
+                val |= fileBuffer[0] << 8;
 
                 if (val != '\n') {
                     if (val == '\r') {
@@ -152,7 +152,7 @@ void LoadTextFile(TextMenu *menu, const char *filePath, byte mapCode)
             }
         }
         else {
-            ushort val = fileBuffer;
+            ushort val = fileBuffer[0];
             if (val != '\n') {
                 if (val == '\r') {
                     if (menu->entrySize[menu->rowCount] > 0) {
@@ -183,8 +183,8 @@ void LoadTextFile(TextMenu *menu, const char *filePath, byte mapCode)
             }
 
             while (!flag) {
-                FileRead(&fileBuffer, 1);
-                val = fileBuffer;
+                FileRead(fileBuffer, 1);
+                val = fileBuffer[0];
                 if (val != '\n') {
                     if (val == '\r') {
                         if (menu->entrySize[menu->rowCount] > 0) {
@@ -226,9 +226,9 @@ void LoadTextFile(TextMenu *menu, const char *filePath, byte mapCode)
         }
 #else
         while (menu->textDataPos < TEXTDATA_COUNT && !ReachedEndOfFile()) {
-            FileRead(&fileBuffer, 1);
-            if (fileBuffer != '\n') {
-                if (fileBuffer == '\r') {
+            FileRead(fileBuffer, 1);
+            if (fileBuffer[0] != '\n') {
+                if (fileBuffer[0] == '\r') {
                     if (menu->entrySize[menu->rowCount] > 0) {
                         menu->rowCount++;
                         menu->entryStart[menu->rowCount] = menu->textDataPos;
@@ -236,7 +236,7 @@ void LoadTextFile(TextMenu *menu, const char *filePath, byte mapCode)
                     }
                 }
                 else {
-                    menu->textData[menu->textDataPos++] = fileBuffer;
+                    menu->textData[menu->textDataPos++] = fileBuffer[0];
                     menu->entrySize[menu->rowCount]++;
                 }
             }
@@ -344,7 +344,7 @@ void LoadConfigListText(TextMenu *menu, int listNo)
 {
     FileInfo info;
     char strBuf[0x100];
-    byte fileBuffer = 0;
+    byte fileBuffer[4];
     byte count      = 0;
     byte strLen     = 0;
     if (LoadFile("Data/Game/GameConfig.bin", &info)) {
@@ -385,10 +385,10 @@ void LoadConfigListText(TextMenu *menu, int listNo)
             strBuf[strLen] = 0;
 
             // Var Value
-            FileRead(&fileBuffer, 1);
-            FileRead(&fileBuffer, 1);
-            FileRead(&fileBuffer, 1);
-            FileRead(&fileBuffer, 1);
+            FileRead(fileBuffer, 1);
+            FileRead(fileBuffer, 1);
+            FileRead(fileBuffer, 1);
+            FileRead(fileBuffer, 1);
         }
 
         // SFX Names
@@ -440,10 +440,10 @@ void LoadConfigListText(TextMenu *menu, int listNo)
                 strBuf[strLen] = '\0';
 
                 // IsHighlighted
-                FileRead(&fileBuffer, 1);
+                FileRead(fileBuffer, 1);
                 if (listNo == c) {
                     AddTextMenuEntry(menu, strBuf);
-                    menu->entryHighlight[menu->rowCount - 1] = fileBuffer;
+                    menu->entryHighlight[menu->rowCount - 1] = fileBuffer[0];
                 }
             }
         }

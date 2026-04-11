@@ -597,8 +597,8 @@ void LoadStageFiles(void)
 {
     FileInfo infoStore;
     FileInfo info;
-    byte readBuffer[4];
-    byte fileBuffer2 = 0;
+    byte fileBuffer[4];
+    byte fileBuffer2[4];
     int scriptID     = 1;
     char strBuffer[0x100];
 
@@ -622,10 +622,10 @@ void LoadStageFiles(void)
         }
 
         if (LoadFile("Data/Game/GameConfig.bin", &info)) {
-            FileRead(readBuffer, 1);
-            FileRead(strBuffer, readBuffer[0]);
-            FileRead(readBuffer, 1);
-            FileRead(strBuffer, readBuffer[0]);
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
+            FileRead(fileBuffer, 1);
+            FileRead(strBuffer, fileBuffer[0]);
 
             byte buf[3];
             for (int c = 0; c < 0x60; ++c) {
@@ -637,9 +637,9 @@ void LoadStageFiles(void)
                 byte globalObjectCount = 0;
                 FileRead(&globalObjectCount, 1);
                 for (byte i = 0; i < globalObjectCount; ++i) {
-                    FileRead(&fileBuffer2, 1);
-                    FileRead(strBuffer, fileBuffer2);
-                    strBuffer[fileBuffer2] = 0;
+                    FileRead(fileBuffer2, 1);
+                    FileRead(strBuffer, fileBuffer2[0]);
+                    strBuffer[fileBuffer2[0]] = 0;
                     SetObjectTypeName(strBuffer, scriptID + i);
                 }
 
@@ -673,9 +673,9 @@ void LoadStageFiles(void)
 				}
 				else {
 					for (byte i = 0; i < globalObjectCount; ++i) {
-						FileRead(&fileBuffer2, 1);
-						FileRead(strBuffer, fileBuffer2);
-						strBuffer[fileBuffer2] = 0;
+						FileRead(fileBuffer2, 1);
+						FileRead(strBuffer, fileBuffer2[0]);
+						strBuffer[fileBuffer2[0]] = 0;
 						GetFileInfo(&infoStore);
 						CloseFile();
 						ParseScriptFile(strBuffer, scriptID++);
@@ -716,7 +716,7 @@ void LoadStageFiles(void)
         }
 
         if (LoadStageFile("StageConfig.bin", stageListPosition, &info)) {
-            FileRead(&fileBuffer, 1); // Load Globals
+            FileRead(fileBuffer, 1); // Load Globals
 
             byte clr[3];
             for (int i = 0x60; i < 0x80; ++i) {
@@ -724,19 +724,19 @@ void LoadStageFiles(void)
                 SetPaletteEntry(-1, i, clr[0], clr[1], clr[2]);
             }
 
-            FileRead(&fileBuffer, 1);
-            stageSFXCount = fileBuffer;
+            FileRead(fileBuffer, 1);
+            stageSFXCount = fileBuffer[0];
             for (byte i = 0; i < stageSFXCount; ++i) {
-                FileRead(&fileBuffer2, 1);
-                FileRead(strBuffer, fileBuffer2);
-                strBuffer[fileBuffer2] = 0;
+                FileRead(fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2[0]);
+                strBuffer[fileBuffer2[0]] = 0;
 
                 SetSfxName(strBuffer, i + globalSFXCount);
             }
             for (byte i = 0; i < stageSFXCount; ++i) {
-                FileRead(&fileBuffer2, 1);
-                FileRead(strBuffer, fileBuffer2);
-                strBuffer[fileBuffer2] = 0;
+                FileRead(fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2[0]);
+                strBuffer[fileBuffer2[0]] = 0;
                 GetFileInfo(&infoStore);
                 CloseFile();
                 LoadSfx(strBuffer, globalSFXCount + i);
@@ -746,9 +746,9 @@ void LoadStageFiles(void)
             byte stageObjectCount = 0;
             FileRead(&stageObjectCount, 1);
             for (byte i = 0; i < stageObjectCount; ++i) {
-                FileRead(&fileBuffer2, 1);
-                FileRead(strBuffer, fileBuffer2);
-                strBuffer[fileBuffer2] = 0;
+                FileRead(fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2[0]);
+                strBuffer[fileBuffer2[0]] = 0;
                 SetObjectTypeName(strBuffer, scriptID + i);
             }
 
@@ -781,9 +781,9 @@ void LoadStageFiles(void)
             if (Engine.usingBytecode) {
 #endif
                 for (byte i = 0; i < stageObjectCount; ++i) {
-                    FileRead(&fileBuffer2, 1);
-                    FileRead(strBuffer, fileBuffer2);
-                    strBuffer[fileBuffer2] = 0;
+                    FileRead(fileBuffer2, 1);
+                    FileRead(strBuffer, fileBuffer2[0]);
+                    strBuffer[fileBuffer2[0]] = 0;
                 }
                 GetFileInfo(&infoStore);
                 CloseFile();
@@ -792,9 +792,9 @@ void LoadStageFiles(void)
             }
             else {
                 for (byte i = 0; i < stageObjectCount; ++i) {
-                    FileRead(&fileBuffer2, 1);
-                    FileRead(strBuffer, fileBuffer2);
-                    strBuffer[fileBuffer2] = 0;
+                    FileRead(fileBuffer2, 1);
+                    FileRead(strBuffer, fileBuffer2[0]);
+                    strBuffer[fileBuffer2[0]] = 0;
                     GetFileInfo(&infoStore);
                     CloseFile();
                     ParseScriptFile(strBuffer, scriptID + i);
@@ -805,9 +805,9 @@ void LoadStageFiles(void)
             }
 #else
             for (byte i = 0; i < stageObjectCount; ++i) {
-                FileRead(&fileBuffer2, 1);
-                FileRead(strBuffer, fileBuffer2);
-                strBuffer[fileBuffer2] = 0;
+                FileRead(fileBuffer2, 1);
+                FileRead(strBuffer, fileBuffer2[0]);
+                strBuffer[fileBuffer2[0]] = 0;
             }
             GetFileInfo(&infoStore);
             CloseFile();
@@ -906,15 +906,15 @@ void LoadActLayout()
         for (int y = 0; y < stageLayouts[0].ysize; ++y) {
             ushort *tiles = &stageLayouts[0].tiles[(y * TILELAYER_CHUNK_H)];
             for (int x = 0; x < stageLayouts[0].xsize; ++x) {
-                FileRead(&fileBuffer[0], 1);
+                FileRead(fileBuffer, 1);
                 tiles[x] = fileBuffer[0];
-                FileRead(&fileBuffer[0], 1);
+                FileRead(fileBuffer, 1);
                 tiles[x] |= fileBuffer[0] << 8;
             }
         }
 
         // READ OBJECTS
-        FileRead(&fileBuffer[0], 2);
+        FileRead(fileBuffer, 2);
         int objectCount = fileBuffer[0] + (fileBuffer[1] << 8);
 #if !RETRO_USE_ORIGINAL_CODE
         if (objectCount > 0x400)
@@ -1030,18 +1030,18 @@ void LoadStageBackground()
 
     FileInfo info;
     if (LoadStageFile("Backgrounds.bin", stageListPosition, &info)) {
-        byte fileBuffer = 0;
+        byte fileBuffer[4];
         byte layerCount = 0;
         FileRead(&layerCount, 1);
         FileRead(&hParallax.entryCount, 1);
         for (byte i = 0; i < hParallax.entryCount; ++i) {
-            FileRead(&fileBuffer, 1);
-            hParallax.parallaxFactor[i] = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            hParallax.parallaxFactor[i] |= fileBuffer << 8;
+            FileRead(fileBuffer, 1);
+            hParallax.parallaxFactor[i] = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            hParallax.parallaxFactor[i] |= fileBuffer[0] << 8;
 
-            FileRead(&fileBuffer, 1);
-            hParallax.scrollSpeed[i] = fileBuffer << 10;
+            FileRead(fileBuffer, 1);
+            hParallax.scrollSpeed[i] = fileBuffer[0] << 10;
 
             hParallax.scrollPos[i] = 0;
 
@@ -1050,13 +1050,13 @@ void LoadStageBackground()
 
         FileRead(&vParallax.entryCount, 1);
         for (byte i = 0; i < vParallax.entryCount; ++i) {
-            FileRead(&fileBuffer, 1);
-            vParallax.parallaxFactor[i] = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            vParallax.parallaxFactor[i] |= fileBuffer << 8;
+            FileRead(fileBuffer, 1);
+            vParallax.parallaxFactor[i] = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            vParallax.parallaxFactor[i] |= fileBuffer[0] << 8;
 
-            FileRead(&fileBuffer, 1);
-            vParallax.scrollSpeed[i] = fileBuffer << 10;
+            FileRead(fileBuffer, 1);
+            vParallax.scrollSpeed[i] = fileBuffer[0] << 10;
 
             vParallax.scrollPos[i] = 0;
 
@@ -1064,20 +1064,20 @@ void LoadStageBackground()
         }
 
         for (byte i = 1; i < layerCount + 1; ++i) {
-            FileRead(&fileBuffer, 1);
-            stageLayouts[i].xsize = fileBuffer;
-            FileRead(&fileBuffer, 1); // Unused (???)
-            FileRead(&fileBuffer, 1);
-            stageLayouts[i].ysize = fileBuffer;
-            FileRead(&fileBuffer, 1); // Unused (???)
-            FileRead(&fileBuffer, 1);
-            stageLayouts[i].type = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            stageLayouts[i].parallaxFactor = fileBuffer;
-            FileRead(&fileBuffer, 1);
-            stageLayouts[i].parallaxFactor |= fileBuffer << 8;
-            FileRead(&fileBuffer, 1);
-            stageLayouts[i].scrollSpeed = fileBuffer << 10;
+            FileRead(fileBuffer, 1);
+            stageLayouts[i].xsize = fileBuffer[0];
+            FileRead(fileBuffer, 1); // Unused (???)
+            FileRead(fileBuffer, 1);
+            stageLayouts[i].ysize = fileBuffer[0];
+            FileRead(fileBuffer, 1); // Unused (???)
+            FileRead(fileBuffer, 1);
+            stageLayouts[i].type = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            stageLayouts[i].parallaxFactor = fileBuffer[0];
+            FileRead(fileBuffer, 1);
+            stageLayouts[i].parallaxFactor |= fileBuffer[0] << 8;
+            FileRead(fileBuffer, 1);
+            stageLayouts[i].scrollSpeed = fileBuffer[0] << 10;
             stageLayouts[i].scrollPos   = 0;
 
             memset(stageLayouts[i].tiles, 0, TILELAYER_CHUNK_COUNT * sizeof(ushort));
@@ -1110,10 +1110,10 @@ void LoadStageBackground()
             for (int y = 0; y < stageLayouts[i].ysize; ++y) {
                 ushort *chunks = &stageLayouts[i].tiles[y * TILELAYER_CHUNK_H];
                 for (int x = 0; x < stageLayouts[i].xsize; ++x) {
-                    FileRead(&fileBuffer, 1);
-                    *chunks = fileBuffer;
-                    FileRead(&fileBuffer, 1);
-                    *chunks |= fileBuffer << 8;
+                    FileRead(fileBuffer, 1);
+                    *chunks = fileBuffer[0];
+                    FileRead(fileBuffer, 1);
+                    *chunks |= fileBuffer[0] << 8;
                     ++chunks;
                 }
             }
@@ -1157,35 +1157,35 @@ void LoadStageCollisions()
     FileInfo info;
     if (LoadStageFile("CollisionMasks.bin", stageListPosition, &info)) {
 
-        byte fileBuffer = 0;
+        byte fileBuffer[4];
         int tileIndex   = 0;
         for (int t = 0; t < TILE_COUNT; ++t) {
             for (int p = 0; p < CPATH_COUNT; ++p) {
-                FileRead(&fileBuffer, 1);
-                bool isCeiling             = fileBuffer >> 4;
-                collisionMasks[p].flags[t] = fileBuffer & 0xF;
-                FileRead(&fileBuffer, 1);
-                collisionMasks[p].angles[t] = fileBuffer;
-                FileRead(&fileBuffer, 1);
-                collisionMasks[p].angles[t] |= fileBuffer << 8;
-                FileRead(&fileBuffer, 1);
-                collisionMasks[p].angles[t] |= fileBuffer << 16;
-                FileRead(&fileBuffer, 1);
-                collisionMasks[p].angles[t] |= fileBuffer << 24;
+                FileRead(fileBuffer, 1);
+                bool isCeiling             = fileBuffer[0] >> 4;
+                collisionMasks[p].flags[t] = fileBuffer[0] & 0xF;
+                FileRead(fileBuffer, 1);
+                collisionMasks[p].angles[t] = fileBuffer[0];
+                FileRead(fileBuffer, 1);
+                collisionMasks[p].angles[t] |= fileBuffer[0] << 8;
+                FileRead(fileBuffer, 1);
+                collisionMasks[p].angles[t] |= fileBuffer[0] << 16;
+                FileRead(fileBuffer, 1);
+                collisionMasks[p].angles[t] |= fileBuffer[0] << 24;
 
                 if (isCeiling) // Ceiling Tile
                 {
                     for (int c = 0; c < TILE_SIZE; c += 2) {
-                        FileRead(&fileBuffer, 1);
-                        collisionMasks[p].roofMasks[c + tileIndex]     = fileBuffer >> 4;
-                        collisionMasks[p].roofMasks[c + tileIndex + 1] = fileBuffer & 0xF;
+                        FileRead(fileBuffer, 1);
+                        collisionMasks[p].roofMasks[c + tileIndex]     = fileBuffer[0] >> 4;
+                        collisionMasks[p].roofMasks[c + tileIndex + 1] = fileBuffer[0] & 0xF;
                     }
 
                     // Has Collision (Pt 1)
-                    FileRead(&fileBuffer, 1);
+                    FileRead(fileBuffer, 1);
                     int id = 1;
                     for (int c = 0; c < TILE_SIZE / 2; ++c) {
-                        if (fileBuffer & id) {
+                        if (fileBuffer[0] & id) {
                             collisionMasks[p].floorMasks[c + tileIndex + 8] = 0;
                         }
                         else {
@@ -1196,10 +1196,10 @@ void LoadStageCollisions()
                     }
 
                     // Has Collision (Pt 2)
-                    FileRead(&fileBuffer, 1);
+                    FileRead(fileBuffer, 1);
                     id = 1;
                     for (int c = 0; c < TILE_SIZE / 2; ++c) {
-                        if (fileBuffer & id) {
+                        if (fileBuffer[0] & id) {
                             collisionMasks[p].floorMasks[c + tileIndex] = 0;
                         }
                         else {
@@ -1248,15 +1248,15 @@ void LoadStageCollisions()
                 else // Regular Tile
                 {
                     for (int c = 0; c < TILE_SIZE; c += 2) {
-                        FileRead(&fileBuffer, 1);
-                        collisionMasks[p].floorMasks[c + tileIndex]     = fileBuffer >> 4;
-                        collisionMasks[p].floorMasks[c + tileIndex + 1] = fileBuffer & 0xF;
+                        FileRead(fileBuffer, 1);
+                        collisionMasks[p].floorMasks[c + tileIndex]     = fileBuffer[0] >> 4;
+                        collisionMasks[p].floorMasks[c + tileIndex + 1] = fileBuffer[0] & 0xF;
                     }
-                    FileRead(&fileBuffer, 1);
+                    FileRead(fileBuffer, 1);
                     int id = 1;
                     for (int c = 0; c < TILE_SIZE / 2; ++c) // HasCollision
                     {
-                        if (fileBuffer & id) {
+                        if (fileBuffer[0] & id) {
                             collisionMasks[p].roofMasks[c + tileIndex + 8] = 0xF;
                         }
                         else {
@@ -1266,11 +1266,11 @@ void LoadStageCollisions()
                         id <<= 1;
                     }
 
-                    FileRead(&fileBuffer, 1);
+                    FileRead(fileBuffer, 1);
                     id = 1;
                     for (int c = 0; c < TILE_SIZE / 2; ++c) // HasCollision (pt 2)
                     {
-                        if (fileBuffer & id) {
+                        if (fileBuffer[0] & id) {
                             collisionMasks[p].roofMasks[c + tileIndex] = 0xF;
                         }
                         else {
@@ -1326,21 +1326,21 @@ void LoadStageGIFFile(int stageID)
 {
     FileInfo info;
     if (LoadStageFile("16x16Tiles.gif", stageID, &info)) {
-        byte fileBuffer = 0;
+        byte fileBuffer[4];
 
         SetFilePosition(6); // GIF89a
-        FileRead(&fileBuffer, 1);
-        int width = fileBuffer;
-        FileRead(&fileBuffer, 1);
-        width |= (fileBuffer << 8);
-        FileRead(&fileBuffer, 1);
-        int height = fileBuffer;
-        FileRead(&fileBuffer, 1);
-        height |= (fileBuffer << 8);
+        FileRead(fileBuffer, 1);
+        int width = fileBuffer[0];
+        FileRead(fileBuffer, 1);
+        width |= (fileBuffer[0] << 8);
+        FileRead(fileBuffer, 1);
+        int height = fileBuffer[0];
+        FileRead(fileBuffer, 1);
+        height |= (fileBuffer[0] << 8);
 
-        FileRead(&fileBuffer, 1); // Palette Size (thrown away) :/
-        FileRead(&fileBuffer, 1); // BG Color index (thrown away)
-        FileRead(&fileBuffer, 1); // idk actually (still thrown away)
+        FileRead(fileBuffer, 1); // Palette Size (thrown away) :/
+        FileRead(fileBuffer, 1); // BG Color index (thrown away)
+        FileRead(fileBuffer, 1); // idk actually (still thrown away)
 
         byte clr[3];
         for (int c = 0; c < 0x80; ++c) FileRead(clr, 3);
@@ -1349,17 +1349,17 @@ void LoadStageGIFFile(int stageID)
             SetPaletteEntry(-1, c, clr[0], clr[1], clr[2]);
         }
 
-        FileRead(&fileBuffer, 1);
-        while (fileBuffer != ',') FileRead(&fileBuffer, 1); // gif image start identifier
+        FileRead(fileBuffer, 1);
+        while (fileBuffer[0] != ',') FileRead(fileBuffer, 1); // gif image start identifier
 
         ushort fileBuffer2 = 0;
         FileRead(&fileBuffer2, 2);
         FileRead(&fileBuffer2, 2);
         FileRead(&fileBuffer2, 2);
         FileRead(&fileBuffer2, 2);
-        FileRead(&fileBuffer, 1);
-        bool interlaced = (fileBuffer & 0x40) >> 6;
-        if ((unsigned int)fileBuffer >> 7 == 1) {
+        FileRead(fileBuffer, 1);
+        bool interlaced = (fileBuffer[0] & 0x40) >> 6;
+        if ((unsigned int)fileBuffer[0] >> 7 == 1) {
             int c = 128;
             byte clr[3];
             do {

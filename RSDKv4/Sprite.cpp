@@ -251,34 +251,34 @@ int LoadBMPFile(const char *filePath, byte sheetID)
         GFXSurface *surface = &gfxSurface[sheetID];
         StrCopy(surface->fileName, filePath);
 
-        byte fileBuffer = 0;
+        byte fileBuffer[4];
 
         SetFilePosition(18);
-        FileRead(&fileBuffer, 1);
-        surface->width = fileBuffer;
-        FileRead(&fileBuffer, 1);
-        surface->width |= fileBuffer << 8;
-        FileRead(&fileBuffer, 1);
-        surface->width |= fileBuffer << 16;
-        FileRead(&fileBuffer, 1);
-        surface->width |= fileBuffer << 24;
+        FileRead(fileBuffer, 1);
+        surface->width = fileBuffer[0];
+        FileRead(fileBuffer, 1);
+        surface->width |= fileBuffer[0] << 8;
+        FileRead(fileBuffer, 1);
+        surface->width |= fileBuffer[0] << 16;
+        FileRead(fileBuffer, 1);
+        surface->width |= fileBuffer[0] << 24;
 
-        FileRead(&fileBuffer, 1);
-        surface->height = fileBuffer;
-        FileRead(&fileBuffer, 1);
-        surface->height |= fileBuffer << 8;
-        FileRead(&fileBuffer, 1);
-        surface->height |= fileBuffer << 16;
-        FileRead(&fileBuffer, 1);
-        surface->height |= fileBuffer << 24;
+        FileRead(fileBuffer, 1);
+        surface->height = fileBuffer[0];
+        FileRead(fileBuffer, 1);
+        surface->height |= fileBuffer[0] << 8;
+        FileRead(fileBuffer, 1);
+        surface->height |= fileBuffer[0] << 16;
+        FileRead(fileBuffer, 1);
+        surface->height |= fileBuffer[0] << 24;
 
         SetFilePosition(info.vfileSize - surface->height * surface->width);
         surface->dataPosition = gfxDataPosition;
         byte *gfxData         = &graphicData[surface->dataPosition + surface->width * (surface->height - 1)];
         for (int y = 0; y < surface->height; ++y) {
             for (int x = 0; x < surface->width; ++x) {
-                FileRead(&fileBuffer, 1);
-                *gfxData++ = fileBuffer;
+                FileRead(fileBuffer, 1);
+                *gfxData++ = fileBuffer[0];
             }
             gfxData -= 2 * surface->width;
         }
@@ -310,26 +310,26 @@ int LoadGIFFile(const char *filePath, byte sheetID)
         GFXSurface *surface = &gfxSurface[sheetID];
         StrCopy(surface->fileName, filePath);
 
-        byte fileBuffer = 0;
+        byte fileBuffer[4];
 
         SetFilePosition(6); // GIF89a
-        FileRead(&fileBuffer, 1);
-        surface->width = fileBuffer;
-        FileRead(&fileBuffer, 1);
-        surface->width |= fileBuffer << 8;
-        FileRead(&fileBuffer, 1);
-        surface->height = fileBuffer;
-        FileRead(&fileBuffer, 1);
-        surface->height |= fileBuffer << 8;
+        FileRead(fileBuffer, 1);
+        surface->width = fileBuffer[0];
+        FileRead(fileBuffer, 1);
+        surface->width |= fileBuffer[0] << 8;
+        FileRead(fileBuffer, 1);
+        surface->height = fileBuffer[0];
+        FileRead(fileBuffer, 1);
+        surface->height |= fileBuffer[0] << 8;
 
-        FileRead(&fileBuffer, 1); // Palette Size
-        // int has_pallete  = (fileBuffer & 0x80) >> 7;
-        // int colors       = ((fileBuffer & 0x70) >> 4) + 1;
-        int palette_size = (fileBuffer & 0x7) + 1;
+        FileRead(fileBuffer, 1); // Palette Size
+        // int has_pallete  = (fileBuffer[0] & 0x80) >> 7;
+        // int colors       = ((fileBuffer[0] & 0x70) >> 4) + 1;
+        int palette_size = (fileBuffer[0] & 0x7) + 1;
         if (palette_size > 0)
             palette_size = 1 << palette_size;
-        FileRead(&fileBuffer, 1); // BG Color index (thrown away)
-        FileRead(&fileBuffer, 1); // idk actually (still thrown away)
+        FileRead(fileBuffer, 1); // BG Color index (thrown away)
+        FileRead(fileBuffer, 1); // idk actually (still thrown away)
 
         int c = 0;
         byte clr[3];
@@ -338,17 +338,17 @@ int LoadGIFFile(const char *filePath, byte sheetID)
             FileRead(clr, 3);
         } while (c != palette_size);
 
-        FileRead(&fileBuffer, 1);
-        while (fileBuffer != ',') FileRead(&fileBuffer, 1); // gif image start identifier
+        FileRead(fileBuffer, 1);
+        while (fileBuffer[0] != ',') FileRead(fileBuffer, 1); // gif image start identifier
 
         ushort fileBuffer2 = 0;
         FileRead(&fileBuffer2, 2);
         FileRead(&fileBuffer2, 2);
         FileRead(&fileBuffer2, 2);
         FileRead(&fileBuffer2, 2);
-        FileRead(&fileBuffer, 1);
-        bool interlaced = (fileBuffer & 0x40) >> 6;
-        if (fileBuffer >> 7 == 1) {
+        FileRead(fileBuffer, 1);
+        bool interlaced = (fileBuffer[0] & 0x40) >> 6;
+        if (fileBuffer[0] >> 7 == 1) {
             int c = 0x80;
             do {
                 ++c;

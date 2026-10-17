@@ -24,14 +24,12 @@ distribution.
 #include "tinyxml2.h"
 
 #include <new>		// yes, this one new style header, is in the Android SDK.
-#if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__) || defined(PS3) || defined(__PS3__)
+#if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__)
 #   include <stddef.h>
 #   include <stdarg.h>
-#   include <stdio.h>
 #else
 #   include <cstddef>
 #   include <cstdarg>
-#   include <cstdio>
 #endif
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
@@ -91,16 +89,6 @@ distribution.
 #else
 	// GCC version 3 and higher
 	//#warning( "Using sn* functions." )
-#if (defined(PS3) || defined(__PS3__)) && defined(__GNUC__) && (__GNUC__ < 13)
-	#define TIXML_SNPRINTF	::snprintf
-	#define TIXML_VSNPRINTF	::vsnprintf
-	static inline int TIXML_VSCPRINTF( const char* format, va_list va )
-	{
-		int len = ::vsnprintf( 0, 0, format, va );
-		TIXMLASSERT( len >= 0 );
-		return len;
-	}
-#else
 	#define TIXML_SNPRINTF	snprintf
 	#define TIXML_VSNPRINTF	vsnprintf
 	static inline int TIXML_VSCPRINTF( const char* format, va_list va )
@@ -109,7 +97,6 @@ distribution.
 		TIXMLASSERT( len >= 0 );
 		return len;
 	}
-#endif
 	#define TIXML_SSCANF   sscanf
 #endif
 

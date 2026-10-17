@@ -43,7 +43,7 @@ TITLE		:=	SonicForever
 APPID		:=	S1F00S2A0
 CONTENTID	:=	UP0001-$(APPID)_00-SONIC1FOREVER000
 
-CFLAGS		=	-O3 -DPS3 -D__PS3__ -DS1F_BUILD -DPS3_DISABLE_NETWORKING -Wall -mcpu=cell -mbig-endian $(MACHDEP) $(INCLUDE) $(INCLUDE) -include ps3_compat.h
+CFLAGS		=	-O2 -DPS3 -D__PS3__ -DS1F_BUILD -DPS3_DISABLE_NETWORKING -DDEBUG -Wall -mcpu=cell -mbig-endian -fno-strict-aliasing -fno-tree-vectorize -fno-aggressive-loop-optimizations -fwrapv $(MACHDEP) $(INCLUDE) -include ps3_compat.h
 CXXFLAGS	=	$(CFLAGS) -std=c++17 -DPS3_DISABLE_NETWORKING -DS1F_BUILD
 
 LDFLAGS		=	-Wl,--gc-sections -s -Wl,--strip-all -Wl,--sort-common=descending $(MACHDEP) -Wl,-Map,$(notdir $@).map
@@ -51,7 +51,7 @@ LDFLAGS		=	-Wl,--gc-sections -s -Wl,--strip-all -Wl,--sort-common=descending $(M
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS		+=	$(shell pkg-config --libs sdl2 theora vorbisfile) -lnet -lsysutil -lsysmodule
+LIBS		+=	$(shell pkg-config --libs sdl2 theora vorbis vorbisfile ogg 2>/dev/null || pkg-config --libs sdl2 theora vorbisfile) -lrsx -lgcm_sys -laudio -lio -lspurs -lnetctl -lnet -lsysutil -lsysmodule -lpsl1ght -llv2
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

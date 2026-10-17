@@ -30,7 +30,7 @@ distribution.
 #   include <stdio.h>
 #   include <stdlib.h>
 #   include <string.h>
-#	if defined(__PS3__)
+#	if defined(__PS3__) || defined(PS3)
 #		include <stddef.h>
 #	endif
 #else
@@ -39,6 +39,11 @@ distribution.
 #   include <cstdio>
 #   include <cstdlib>
 #   include <cstring>
+#endif
+
+#if defined(PS3) || defined(__PS3__)
+#   include <stdio.h>
+#   include <stdarg.h>
 #endif
 #include <stdint.h>
 

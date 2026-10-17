@@ -43,7 +43,7 @@ TITLE		:=	SonicForever
 APPID		:=	S1F00S2A0
 CONTENTID	:=	UP0001-$(APPID)_00-SONIC1FOREVER000
 
-CFLAGS		=	-O2 -DPS3 -D__PS3__ -DS1F_BUILD -DPS3_DISABLE_NETWORKING -DDEBUG -Wall -mcpu=cell -mbig-endian -fno-strict-aliasing -fno-tree-vectorize -fno-aggressive-loop-optimizations -fwrapv $(MACHDEP) $(INCLUDE) -include ps3_compat.h
+CFLAGS		=	-O1 -DPS3 -D__PS3__ -DS1F_BUILD -DPS3_DISABLE_NETWORKING -DDEBUG -Wall -mcpu=cell -mbig-endian -fno-strict-aliasing -fno-tree-vectorize -fno-aggressive-loop-optimizations -fwrapv -fno-strict-overflow -fno-finite-math-only -fno-inline -fno-optimize-sibling-calls $(MACHDEP) $(INCLUDE) -include ps3_compat.h
 CXXFLAGS	=	$(CFLAGS) -std=c++17 -DPS3_DISABLE_NETWORKING -DS1F_BUILD
 
 LDFLAGS		=	-Wl,--gc-sections -s -Wl,--strip-all -Wl,--sort-common=descending $(MACHDEP) -Wl,-Map,$(notdir $@).map

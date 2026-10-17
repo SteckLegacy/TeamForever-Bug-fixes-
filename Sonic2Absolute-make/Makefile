@@ -43,7 +43,7 @@ TITLE		:=	SonicAbsolute
 APPID		:=	S2A00S1F0
 CONTENTID	:=	UP0001-$(APPID)_00-SONIC2ABSOLUTE00
 
-CFLAGS		=	-O2 -DPS3 -D__PS3__ -DS2A_BUILD -DPS3_DISABLE_NETWORKING -DDEBUG -Wall -mcpu=cell -mbig-endian -fno-strict-aliasing -fno-tree-vectorize -fno-aggressive-loop-optimizations -fwrapv $(MACHDEP) $(INCLUDE) -include ps3_compat.h
+CFLAGS		=	-O1 -DPS3 -D__PS3__ -DS2A_BUILD -DPS3_DISABLE_NETWORKING -DDEBUG -Wall -mcpu=cell -mbig-endian -fno-strict-aliasing -fno-tree-vectorize -fno-aggressive-loop-optimizations -fwrapv -fno-strict-overflow -fno-finite-math-only -fno-inline -fno-optimize-sibling-calls $(MACHDEP) $(INCLUDE) -include ps3_compat.h
 CXXFLAGS	=	$(CFLAGS) -std=c++17 -DPS3_DISABLE_NETWORKING -DS2A_BUILD
 
 LDFLAGS		=	-Wl,--gc-sections -s -Wl,--strip-all -Wl,--sort-common=descending $(MACHDEP) -Wl,-Map,$(notdir $@).map
